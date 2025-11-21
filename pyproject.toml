@@ -1,0 +1,17 @@
+[project]
+name = "nickloan"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.17.2",
+    "argon2-cffi>=25.1.0",
+    "asyncpg>=0.30.0",
+    "environs>=14.5.0",
+    "fastapi[standard]>=0.121.3",
+    "greenlet>=3.2.4",
+    "passlib>=1.7.4",
+    "sqlalchemy>=2.0.44",
+    "sqlmodel>=0.0.27",
+]
