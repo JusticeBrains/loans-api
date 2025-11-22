@@ -40,7 +40,7 @@ class UserService:
         query = select(User).where(User.id == id)
         result = await session.exec(query)
 
-        user = result.one_or_none()
+        user = result.unique().one_or_none()
 
         if not user:
             raise HTTPException(

@@ -44,7 +44,7 @@ class CompanyService:
         query = select(Company).where(Company.id == id)
         result = await session.exec(query)
 
-        company = result.one_or_none()
+        company = result.unique().one_or_none()
 
         if not company:
             raise HTTPException(
