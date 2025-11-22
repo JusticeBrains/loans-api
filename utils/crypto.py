@@ -9,3 +9,4 @@ def hash_password(password: str):
 
 def verify_password(password: str, hashed_password: str):
     return pwd_hasher.verify(password, hashed_password)
+

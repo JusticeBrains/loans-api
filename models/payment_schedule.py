@@ -58,8 +58,20 @@ class PaymentSchedule(SQLModel, table=True):
     company_id: UUID | None = Field(
         foreign_key="companies.id", nullable=True, default=None
     )
-
     company_name: str | None = Field(
+        sa_column=Column(String(100), nullable=True, default=None)
+    )
+    user_id: UUID | None = Field(
+        foreign_key="users.id", nullable=True, default=None
+    )
+    user_name: str | None = Field(
+        sa_column=Column(String(100), nullable=True, default=None)
+    )
+
+    modified_by: UUID | None = Field(
+        foreign_key="users.id", nullable=True, default=None
+    )
+    modified_by_name: str | None = Field(
         sa_column=Column(String(100), nullable=True, default=None)
     )
 

@@ -1,10 +1,8 @@
-from unittest import result
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from config.db import get_session
 from models.employee import Employee
 from schemas.employee import EmployeeCreate, EmployeeUpdate
 from schemas.base import ResponseModel

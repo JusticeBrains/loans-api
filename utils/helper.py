@@ -89,8 +89,10 @@ async def defualt_schedule_generation(
                         monthly_payment=monthly_amount,
                         balance_bf=amount_left + monthly_amount,
                         balance=amount_left,
-                        # company_id=loan_entry.company_id,
-                        # company_name=loan_entry.company_name,
+                        # company_id=loan_id.company_id,
+                        # company_name=loan_id.company_name,
+                        user_id=loan_id.user_id,
+                        # user_name=loan_id.user_name,
                     ),
                     session=session,
                 )

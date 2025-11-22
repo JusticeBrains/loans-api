@@ -37,3 +37,14 @@ class UserUpdate(UserCreate):
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
+
+
+class UserLogin(SQLModel):
+    username: str
+    password: str
+
+
+class Token(SQLModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"

@@ -7,8 +7,8 @@ from sqlmodel import SQLModel
 
 class PaymentScheduleBase(SQLModel):
     loan_entry_id: UUID
-    month: int
-    monthly_payment: Decimal
+    month: int | None = None
+    monthly_payment: Decimal | None = None
     employee_code: str | None = None
     employee_fullname: str | None = None
     interest: Decimal | None = None
@@ -19,11 +19,14 @@ class PaymentScheduleBase(SQLModel):
     difference: Decimal | None = None
     paid: bool = False
     is_deleted: bool = False
-    # company_id: UUID
+    company_id: UUID | None = None
+    company_name: str | None = None
+    user_id: UUID | None = None
+    user_name: str | None = None
 
 
 class PaymentScheduleCreate(PaymentScheduleBase):
-    company_name: str | None = None
+    pass
 
 
 class PaymentScheduleRead(PaymentScheduleBase):
@@ -33,4 +36,5 @@ class PaymentScheduleRead(PaymentScheduleBase):
 
 
 class PaymentScheduleUpdate(PaymentScheduleBase):
-    pass
+    modified_by: UUID | None = None
+    modified_by_name: str | None = None

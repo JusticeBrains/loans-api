@@ -10,7 +10,7 @@ from schemas.user import UserCreate, UserRead, UserUpdate
 from services.user import UserService
 
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/{id}", response_model=UserRead, status_code=status.HTTP_200_OK)

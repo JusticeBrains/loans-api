@@ -1,13 +1,9 @@
-import re
-from unittest import result
 from uuid import UUID
 from datetime import date
 from fastapi import HTTPException, status
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-from config.db import get_session
 
 
 from models.period_year import PeriodYear, Period
@@ -16,10 +12,13 @@ from schemas.period_year import (
     PeriodCreate,
     PeriodRead,
     PeriodYearCreate,
-    PeriodYearRead,
-    PeriodYearUpdate,
 )
-from utils.helper import MONTH_NAMES, count_working_days, generate_calender, get_days_in_month
+from utils.helper import (
+    MONTH_NAMES,
+    count_working_days,
+    generate_calender,
+    get_days_in_month,
+)
 
 
 class PeriodYearService:
@@ -38,9 +37,7 @@ class PeriodYearService:
                 first_day = calender[0][0]
                 last_week = calender[-1]
                 last_day = last_week[-1] if last_week[-1] != 0 else last_week[-2]
-                days_in_month = get_days_in_month(
-                    year=period_year.year, month=month
-                )
+                days_in_month = get_days_in_month(year=period_year.year, month=month)
                 period_code = (
                     f"{MONTH_NAMES.get(month)[:3].upper()}{str(period_year.year)[2:]}"
                 )
@@ -70,7 +67,9 @@ class PeriodYearService:
                     "total_hours_per_day": total_hours_per_day,
                 }
                 period_data = PeriodCreate(**data)
-                period = await PeriodService.create_period(data=period_data, session=session)
+                period = await PeriodService.create_period(
+                    data=period_data, session=session
+                )
 
         return period_year
 

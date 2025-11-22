@@ -11,3 +11,4 @@ wheels/
 alembic/versions/*
 alembic.ini
 uv.lock
+.env*

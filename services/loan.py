@@ -1,7 +1,5 @@
-from datetime import date, timedelta
+from datetime import date
 import math
-from pickle import TRUE
-from unittest import result
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -153,13 +151,17 @@ class LoanEntriesService:
         return loan_entry
 
     @staticmethod
-    async def get_loan_entries(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_loan_entries(
+        session: AsyncSession, id: UUID | None = None, limit: int = 10, offset: int = 0
+    ):
         query = (
             select(LoanEntries)
             .order_by(LoanEntries.id)
             .limit(limit=limit)
             .offset(offset=offset)
         )
+        if id:
+            query = query.where(LoanEntries.id == id)
         result = await session.exec(query)
 
         loan_entries = result.unique().all()
