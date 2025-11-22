@@ -18,16 +18,11 @@ class Employee(SQLModel, table=True):
     lastname: str = Field(sa_column=Column(String(80), nullable=False))
     middlename: str | None = Field(sa_column=Column(String(80), nullable=True))
     fullname: str = Field(sa_column=Column(String(150), nullable=False))
+    national_id: str | None = Field(sa_column=Column(String(15), nullable=True))
+
     company_id: uuid.UUID = Field(foreign_key="companies.id", nullable=False)
-    
-    company: Company = Relationship(
-        back_populates="employees", sa_relationship_kwargs={"lazy": "joined"}
-    )
 
     user_id: uuid.UUID | None = Field(foreign_key="users.id", nullable=True)
-    user: User = Relationship(
-        back_populates="employees", sa_relationship_kwargs={"lazy": "joined"}
-    )
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(

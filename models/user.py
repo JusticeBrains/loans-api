@@ -1,9 +1,10 @@
 import uuid
 from random import random
 from datetime import datetime
-from sqlmodel import Relationship, SQLModel, Field, Column, String, Boolean
+from sqlmodel import SQLModel, Field, Column, String, Boolean
 
 from models.company import Company
+from models.loan import Loan
 
 
 class User(SQLModel, table=True):
@@ -26,13 +27,6 @@ class User(SQLModel, table=True):
     pin: str | None = Field(sa_column=Column(String(6), nullable=True, default=None))
 
     company_id: uuid.UUID = Field(foreign_key="companies.id", nullable=False)
-    company: Company = Relationship(
-        back_populates="users", sa_relationship_kwargs={"lazy": "joined"}
-    )
-
-    employees: list["Employee"] = Relationship(back_populates="user")
-    # period_years: list["PeriodYear"] = Relationship(back_populates="users", sa_relationship_kwargs={"lazy": "joined"})
-    # periods: list["Period"] = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "joined"})
 
     is_active: bool = Field(sa_column=Column(Boolean, nullable=False, default=True))
     is_super: bool = Field(sa_column=Column(Boolean, nullable=False, default=False))
