@@ -6,7 +6,7 @@ class InterestCalculationType(StrEnum):
     AMORTIZATION = "Amortization"
     TERM = "Loan Term"
     REDUCING = "Reducing Balance"
-    EQUAL_PAYMENT = "Reducing Balance (Equal Payment)"
+    EQUAL_PAYMENT = "Reducing Balance (Equal Repayment)"
     STRAIGHT_LINE = "Straight Line"
 
 
