@@ -37,11 +37,12 @@ async def get_employee(
 async def get_employees(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
+    company_id: UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
     return await EmployeeService.get_employees(
-        session=session, limit=limit, offset=offset
+        session=session, company_id=company_id, limit=limit, offset=offset
     )
 
 
