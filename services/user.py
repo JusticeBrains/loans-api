@@ -1,5 +1,8 @@
+from collections import defaultdict
+from datetime import datetime, timedelta
 from uuid import UUID
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
+from ua_parser.user_agent_parser import Parse
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -8,6 +11,8 @@ from models.user import User
 from schemas.user import UserCreate, UserLogin, UserRead, UserUpdate, Token
 from schemas.base import ResponseModel
 from utils.crypto import hash_password, verify_password
+
+from config.settings import REQUESTS_PER_MINUTE
 
 
 class UserService:
@@ -165,3 +170,72 @@ class UserService:
             )
 
         return user
+
+
+class UserActivity:
+    def __init__(self, requests_per_minute: int = REQUESTS_PER_MINUTE):
+        self.requests_per_minute = requests_per_minute
+        self.requests = defaultdict(list)
+        self.user_info = defaultdict(list)
+
+    async def is_rate_limited(self, token: str) -> bool:
+        """Check if token has exceeded rate limit"""
+        now = datetime.now()
+        minutes_ago = now - timedelta(minutes=1)
+
+        self.requests[token] = [
+            req for req in self.requests[token] if req > minutes_ago
+        ]
+
+        if len(self.requests[token]) >= self.requests_per_minute:
+            return True
+
+        self.requests[token].append(now)
+        return False
+
+    async def get_client_ip(self, request: Request):
+        forwarded = request.headers.get("X-Forwarded-For")
+
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+
+        return request.client.host if request.client else "unknown"
+
+    async def get_device_identifier(self, user_agent: str):
+        ua = Parse(user_agent)
+
+        browser = ua["user_agent"]["family"]
+        os = ua["os"]["family"]
+        device = ua["device"]["family"]
+
+        return f"{browser}_{os}_{device}"
+
+    async def track_user_activity(self, user_id: str, ip: str, device: str):
+        current_time = datetime.now()
+
+        activity = {
+            "ip": ip,
+            "device": device,
+            "last_seen": current_time,
+            "ip_changed": False,
+            "device_changed": False,
+            "username": user_id,
+        }
+
+        if user_id not in self.user_info:
+            self.user_info[user_id] = [activity]
+            return True
+
+        user_data = self.user_info[user_id]
+
+        ip_changed = user_data[-1]["ip"] != ip
+        device_changed = user_data[-1]["device"] != device
+
+        user_data[-1]["ip_changed"] = ip_changed
+        user_data[-1]["ip"] = ip
+        user_data[-1]["device_changed"] = device_changed
+        user_data[-1]["last_seen"] = current_time
+        user_data[-1]["device"] = device
+        user_data[-1]["username"] = user_id
+
+        return user_data
