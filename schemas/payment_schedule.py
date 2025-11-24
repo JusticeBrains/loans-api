@@ -23,6 +23,7 @@ class PaymentScheduleBase(SQLModel):
     company_name: str | None = None
     user_id: UUID | None = None
     user_name: str | None = None
+    modified_by_name: str | None = None
 
 
 class PaymentScheduleCreate(PaymentScheduleBase):

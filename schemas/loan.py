@@ -14,10 +14,10 @@ class LoanBase(SQLModel):
     name: str
     interest_term: InterestTerm
     calculation_type: InterestCalculationType
-    min_amount: Decimal
-    max_amount: Decimal
-    interest_rate: Decimal
-    exclude: bool
+    min_amount: Decimal | None = None
+    max_amount: Decimal | None = None
+    interest_rate: Decimal | None = None
+    exclude: bool | None = False
     company_id: UUID
     user_id: UUID
 
@@ -48,6 +48,7 @@ class LoanEntriesBase(SQLModel):
     code: str | None = None
     loan_id: UUID
     description: str | None = None
+    loan_name: str | None = None
     amount: Decimal
     employee_id: UUID
     employee_code: str | None = None

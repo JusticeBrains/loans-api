@@ -28,7 +28,7 @@ class Loan(SQLModel, table=True):
     interest_term: str = Field(
         sa_column=Column(
             Enum(InterestTerm, native_enum=False),
-            nullable=False,
+            nullable=True,
             default=InterestTerm.PER_ANNUM,
         )
     )
@@ -40,21 +40,25 @@ class Loan(SQLModel, table=True):
         )
     )
 
-    min_amount: Decimal = Field(
+    min_amount: Decimal | None  = Field(
         sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
-    max_amount: Decimal = Field(
+    max_amount: Decimal | None = Field(
         sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
-    interest_rate: Decimal = Field(
+    interest_rate: Decimal | None = Field(
         sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
 
-    company_id: UUID = Field(foreign_key="companies.id", nullable=False)
+    company_id: UUID | None = Field(foreign_key="companies.id", nullable=True, default=None)
 
-    user_id: UUID = Field(foreign_key="users.id", nullable=False, index=True)
+    user_id: UUID | None = Field(
+        foreign_key="users.id", nullable=True, index=True, default=None
+    )
 
-    modified_by_id: UUID = Field(foreign_key="users.id", nullable=True, default=None)
+    modified_by_id: UUID | None = Field(
+        foreign_key="users.id", nullable=True, default=None
+    )
 
     exclude: bool = Field(sa_column=Column(Boolean, default=False))
     created_at: datetime = Field(default_factory=datetime.now)
@@ -67,20 +71,25 @@ class LoanEntries(SQLModel, table=True):
     __tablename__ = "loan_entries"
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    code: str = Field(sa_column=Column(String(20), nullable=False, index=True))
+    code: str = Field(sa_column=Column(String(20), nullable=True, default=None))
 
     loan_id: UUID = Field(foreign_key="loans.id", nullable=False)
 
-    description: str = Field(sa_column=Column(String(255), nullable=False))
+    loan_name: str = Field(sa_column=Column(String(255), nullable=False))
+    description: str = Field(sa_column=Column(String(255), nullable=True, default=None))
     amount: Decimal = Field(sa_column=Column(DECIMAL(10, 2), nullable=False))
 
-    employee_id: UUID = Field(foreign_key="employees.id", nullable=False)
+    employee_id: UUID = Field(foreign_key="employees.id", nullable=True, default=None)
 
-    employee_code: str = Field(sa_column=Column(String(20), nullable=False))
-    employee_fullname: str = Field(sa_column=Column(String(255), nullable=False))
-    national_id: str = Field(sa_column=Column(String(20), nullable=False, index=True))
+    employee_code: str = Field(
+        sa_column=Column(String(20), nullable=True, default=None)
+    )
+    employee_fullname: str | None = Field(
+        sa_column=Column(String(255), nullable=True, default=None)
+    )
+    national_id: str | None = Field(sa_column=Column(String(20), nullable=True, default=None))
 
-    user_id: UUID = Field(foreign_key="users.id", nullable=False)
+    user_id: UUID | None = Field(foreign_key="users.id", nullable=True, default=None)
 
     modified_by_id: UUID | None = Field(
         foreign_key="users.id", nullable=True, default=None
@@ -100,7 +109,7 @@ class LoanEntries(SQLModel, table=True):
     )
 
     periodic_principal: Decimal | None = Field(
-        sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
+        sa_column=Column(DECIMAL(7, 2), nullable=True, default=None)
     )
     monthly_repayment: Decimal | None = Field(
         sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)

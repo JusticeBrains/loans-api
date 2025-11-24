@@ -90,6 +90,9 @@ class Payment(SQLModel, table=True):
     loan_entry_description: str | None = Field(
         sa_column=Column(String(255), nullable=True, default=None)
     )
+    loan_entry_name: str | None = Field(
+        sa_column=Column(String(255), nullable=True, default=None)
+    )
     loan_entry_code: str | None = Field(
         sa_column=Column(String(20), nullable=True, default=None)
     )
@@ -129,13 +132,13 @@ class Payment(SQLModel, table=True):
         sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
 
-    company_id: UUID = Field(foreign_key="companies.id", nullable=False)
+    company_id: UUID = Field(foreign_key="companies.id", nullable=True, default=None)
 
     company_name: str | None = Field(
         sa_column=Column(String(100), nullable=True, default=None)
     )
 
-    user_id: UUID = Field(foreign_key="users.id", nullable=False)
+    user_id: UUID = Field(foreign_key="users.id", nullable=True, default=None)
 
     user_name: str | None = Field(
         sa_column=Column(String(100), nullable=True, default=None)

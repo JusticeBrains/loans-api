@@ -17,10 +17,11 @@ class Employee(SQLModel, table=True):
     firstname: str = Field(sa_column=Column(String(80), nullable=False, index=True))
     lastname: str = Field(sa_column=Column(String(80), nullable=False))
     middlename: str | None = Field(sa_column=Column(String(80), nullable=True))
-    fullname: str = Field(sa_column=Column(String(150), nullable=False))
+    fullname: str | None = Field(sa_column=Column(String(150), nullable=True, default=None))
     national_id: str | None = Field(sa_column=Column(String(15), nullable=True))
 
     company_id: uuid.UUID = Field(foreign_key="companies.id", nullable=False)
+    company_name: str = Field(sa_column=Column(String(50), nullable=False, index=True))
 
     user_id: uuid.UUID | None = Field(foreign_key="users.id", nullable=True)
 

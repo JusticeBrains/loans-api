@@ -9,6 +9,7 @@ from utils.text_options import PaymentType
 class PaymentBase(SQLModel):
     loan_entry_id: UUID
     loan_entry_description: str | None = None
+    loan_entry_name: str | None = None
     loan_entry_code: str | None = None
     employee_id: UUID | None = None
     employee_code: str | None = None
