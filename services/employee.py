@@ -51,13 +51,16 @@ class EmployeeService:
         return employee
 
     @staticmethod
-    async def get_employees(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_employees(session: AsyncSession, company_id: UUID | None = None,limit: int = 10, offset: int = 0):
         query = (
             select(Employee)
             .order_by(Employee.code)
             .limit(limit=limit)
             .offset(offset=offset)
         )
+
+        if company_id:
+            query = query.where(Employee.company_id == company_id)
 
         results = await session.exec(query)
         all_employees = results.unique().all()
