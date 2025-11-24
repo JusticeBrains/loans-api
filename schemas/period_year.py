@@ -19,7 +19,7 @@ class PeriodYearUpdate(PeriodYearBase):
 
 
 class PeriodYearRead(PeriodYearBase):
-    id: UUID
+    id: int
     created_at: datetime
     updated_at: datetime
 
@@ -37,7 +37,7 @@ class PeriodBase(SQLModel):
     total_working_hours: int
     total_hours_per_day: int
     company_id: UUID
-    period_year_id: UUID
+    period_year_id: int
     user_id: UUID | None = None
 
 
@@ -47,8 +47,8 @@ class PeriodCreate(PeriodBase):
 
 class PeriodRead(SQLModel):
     id: UUID
-    month: int
-    year: int
+    month: int 
+    year: int | None = None
     period_code: str
     period_name: str
     start_date: date
@@ -57,8 +57,8 @@ class PeriodRead(SQLModel):
     total_working_days: int
     total_working_hours: int
     total_hours_per_day: int
-    company_id: UUID
-    period_year_id: UUID
+    company_id: UUID | None = None
+    period_year_id: int
     user_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
