@@ -74,7 +74,7 @@ class PeriodYearService:
         return period_year
 
     @staticmethod
-    async def get_period(id: UUID, session: AsyncSession):
+    async def get_period(id: int, session: AsyncSession):
         query = select(PeriodYear).where(PeriodYear.id == id)
         result = await session.exec(query)
 
@@ -104,7 +104,7 @@ class PeriodYearService:
         return ResponseModel(count=count, results=periods)
 
     @staticmethod
-    async def delete_period(id: UUID, session: AsyncSession):
+    async def delete_period(id: int, session: AsyncSession):
         period_year = await PeriodYearService.get_period(id=id, session=session)
 
         if not period_year:
