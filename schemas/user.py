@@ -14,7 +14,7 @@ class UserCreate(SQLModel):
     password: str
     pin: str | None = None
     company_id: uuid.UUID
-    is_super: bool = False
+    is_super: int = 0
 
 
 class UserRead(UserCreate):
@@ -36,7 +36,7 @@ class UserUpdate(UserCreate):
     company_id: uuid.UUID | None = None
     is_password_changed: bool
     is_password_reset: bool
-    is_active: bool
+    is_active: int = 1
 
 
 class UserLogin(SQLModel):
