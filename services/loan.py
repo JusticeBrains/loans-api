@@ -132,6 +132,7 @@ class LoanEntriesService:
                 )
             data.code = loan.code
             data.description = loan.name
+            data.loan_name = loan.name
 
         loan_entry = LoanEntries.model_validate(data)
         session.add(loan_entry)
