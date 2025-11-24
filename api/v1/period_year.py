@@ -16,7 +16,7 @@ router = APIRouter(prefix="/period_year", tags=["period years"])
 
 @router.get("/{id}", response_model=PeriodYearRead, status_code=status.HTTP_200_OK)
 async def get_period_year(
-    id: UUID,
+    id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
@@ -33,7 +33,7 @@ async def get_period_years(
 
 @router.delete("/{id}", response_model={}, status_code=status.HTTP_204_NO_CONTENT)
 async def delete_period_year(
-    id: UUID,
+    id: int,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
