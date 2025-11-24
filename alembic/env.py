@@ -25,6 +25,19 @@ DATABASE_URL = env.str("DATABASE_URL")
 if DATABASE_URL:
     config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
+EXCLUDED_TABLES = {
+    "account_emailaddress", "django_migrations", "account_emailconfirmation", 
+    "spatial_ref_sys", "auth_permission", "auth_user", "auth_user_groups",
+    "auth_user_user_permissions", "authtoken_token", "auth_group", 
+    "django_content_type", "django_admin_log", "django_session", 
+    "socialaccount_socialaccount", "socialaccount_socialapp", 
+    "socialaccount_socialtoken"
+}
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and name in EXCLUDED_TABLES:
+        return False
+    return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -34,6 +47,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -45,6 +59,7 @@ def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
+        include_object=include_object,
     )
     with context.begin_transaction():
         context.run_migrations()
