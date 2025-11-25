@@ -10,7 +10,7 @@ from config.dependencies import get_current_user
 from models.user import User
 from schemas.base import ResponseModel
 from schemas.payment import PaymentCreate, PaymentRead
-from schemas.payment_schedule import PaymentScheduleCreate, PaymentScheduleRead
+from schemas.payment_schedule import PaymentScheduleRead
 from services.payment import PaymentService
 from services.payment_schedule import PaymentScheduleService
 
