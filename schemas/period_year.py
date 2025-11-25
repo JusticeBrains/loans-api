@@ -47,7 +47,7 @@ class PeriodCreate(PeriodBase):
 
 class PeriodRead(SQLModel):
     id: UUID
-    month: int 
+    month: int
     year: int | None = None
     period_code: str
     period_name: str
