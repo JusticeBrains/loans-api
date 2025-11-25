@@ -10,6 +10,7 @@ class EmployeeBase(SQLModel):
     middlename: str | None = None
     company_id: uuid.UUID
     user_id: uuid.UUID | None = None
+    modified_by_id: uuid.UUID | None = None
     national_id: str | None = None
 
 

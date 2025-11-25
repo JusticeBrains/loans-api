@@ -44,4 +44,6 @@ async def create_period_year(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await PeriodYearService.create_period_year(data=data, session=session)
+    return await PeriodYearService.create_period_year(
+        data=data, session=session, current_user=current_user
+    )

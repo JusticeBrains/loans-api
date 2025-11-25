@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from models.payment_schedule import Payment
+from models.user import User
 from schemas.base import ResponseModel
 from schemas.payment import PaymentCreate
 from uuid import UUID
@@ -11,14 +12,16 @@ from schemas.payment_schedule import PaymentScheduleUpdate
 from services.company import CompanyService
 from services.loan import LoanEntriesService
 from services.payment_schedule import PaymentScheduleService
-from services.user import UserService
+
 from utils.helper import get_sorted_schedules_and_min_month
 from utils.text_options import PaymentType
 
 
 class PaymentService:
     @staticmethod
-    async def create_payment(data: PaymentCreate, session: AsyncSession):
+    async def create_payment(
+        data: PaymentCreate, session: AsyncSession, current_user: User
+    ):
         try:
             loan_entry = await LoanEntriesService.get_loan_entry(
                 id=data.loan_entry_id, session=session
@@ -26,12 +29,6 @@ class PaymentService:
             if not loan_entry:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
-                )
-
-            user = await UserService.get_user(id=data.user_id, session=session)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
                 )
 
             company = await CompanyService.get_company(
@@ -52,14 +49,14 @@ class PaymentService:
                     detail="No payment schedule found for this loan entry",
                 )
 
-            payment = Payment.model_validate(data)
+            payment = Payment.model_validate(data, update={"user_id": current_user.id})
             payment.employee_id = loan_entry.employee_id
             payment.employee_code = loan_entry.employee_code
             payment.employee_fullname = loan_entry.employee_fullname
             payment.loan_amount = loan_entry.amount
             payment.loan_entry_description = loan_entry.description
             payment.loan_entry_code = loan_entry.code
-            payment.user_name = user.username
+            payment.user_name = current_user.username
             payment.company_name = company.name
 
             session.add(payment)
@@ -81,8 +78,8 @@ class PaymentService:
                     amount_paid=amount_paid,
                     paid=True,
                     difference=round(amount_paid - expected_monthly_amount, 2),
-                    modified_by=user.id,
-                    modified_by_name=user.username,
+                    modified_by=current_user.id,
+                    modified_by_name=current_user.username,
                 )
 
                 await PaymentScheduleService.update_schedule(
@@ -132,8 +129,8 @@ class PaymentService:
                         difference=round(difference, 2),
                         month=schedule.month,
                         monthly_payment=schedule.monthly_payment,
-                        modified_by=user.id,
-                        modified_by_name=user.username,
+                        modified_by=current_user.id,
+                        modified_by_name=current_user.username,
                     )
                     await PaymentScheduleService.update_schedule(
                         id=schedule.id, data=schedule_update, session=session

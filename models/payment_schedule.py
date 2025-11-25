@@ -108,7 +108,10 @@ class Payment(SQLModel, table=True):
 
     amount_paid: Decimal = Field(sa_column=Column(DECIMAL(10, 2), nullable=False))
     payment_type: PaymentType = Field(
-        sa_column=Column(Enum(PaymentType,name="payment_type_enum", native_enum=True), nullable=False)
+        sa_column=Column(
+            Enum(PaymentType, name="payment_type_enum", native_enum=True),
+            nullable=False,
+        )
     )
 
     payment_amount: Decimal | None = Field(

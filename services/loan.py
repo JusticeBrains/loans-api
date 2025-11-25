@@ -8,6 +8,7 @@ from sqlmodel import select
 from dateutil.relativedelta import relativedelta
 
 from models.loan import Loan, LoanEntries
+from models.user import User
 from schemas.base import ResponseModel
 from schemas.loan import LoanCreate, LoanEntriesCreate, LoanEntriesUpdate, LoanUpdate
 from services.employee import EmployeeService
@@ -18,7 +19,9 @@ from utils.helper import defualt_schedule_generation, delete_payment_by_loan_ent
 
 class LoanService:
     @staticmethod
-    async def create_loan(data: LoanCreate, session: AsyncSession):
+    async def create_loan(data: LoanCreate, session: AsyncSession, current_user: User):
+        data = data.model_dump()
+        data["user_id"] = current_user.id
         loan = Loan.model_validate(data)
 
         session.add(loan)
@@ -67,7 +70,9 @@ class LoanService:
         return {}
 
     @staticmethod
-    async def update_loan(id: UUID, data: LoanUpdate, session: AsyncSession):
+    async def update_loan(
+        id: UUID, data: LoanUpdate, session: AsyncSession, current_user: User
+    ):
         loan = await LoanService.get_loan(id=id, session=session)
         if not loan:
             raise HTTPException(
@@ -76,6 +81,7 @@ class LoanService:
         for key, value in data.model_dump(exclude_unset=True).items():
             setattr(loan, key, value)
 
+        loan["modified_by_id"] = current_user.id
         session.add(loan)
         await session.commit()
         await session.refresh(loan)
@@ -85,7 +91,9 @@ class LoanService:
 
 class LoanEntriesService:
     @staticmethod
-    async def create_loan_entry(data: LoanEntriesCreate, session: AsyncSession):
+    async def create_loan_entry(
+        data: LoanEntriesCreate, session: AsyncSession, current_user: User
+    ):
         deduction_period: date | None = None
         if not data.calculation_type:
             if data.deduction_start_period_id:
@@ -131,6 +139,8 @@ class LoanEntriesService:
             data.code = loan.code
             data.description = loan.name
             data.loan_name = loan.name
+
+        data.user_id = current_user.id
 
         loan_entry = LoanEntries.model_validate(data)
         session.add(loan_entry)
@@ -207,7 +217,7 @@ class LoanEntriesService:
 
     @staticmethod
     async def update_loan_entry(
-        id: UUID, data: LoanEntriesUpdate, session: AsyncSession
+        id: UUID, data: LoanEntriesUpdate, session: AsyncSession, current_user: User
     ):
         loan_entry = await LoanEntriesService.get_loan_entry(id=id, session=session)
         if not loan_entry:
@@ -218,6 +228,7 @@ class LoanEntriesService:
             if value:
                 setattr(loan_entry, key, value)
 
+        loan_entry["modified_by_id"] = current_user.id
         session.add(loan_entry)
         await session.commit()
         await session.refresh(loan_entry)

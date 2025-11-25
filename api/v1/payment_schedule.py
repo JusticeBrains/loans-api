@@ -23,7 +23,9 @@ async def create_payment(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await PaymentService.create_payment(data=data, session=session)
+    return await PaymentService.create_payment(
+        data=data, session=session, current_user=current_user
+    )
 
 
 @router.get("/", response_model=ResponseModel, status_code=status.HTTP_200_OK)

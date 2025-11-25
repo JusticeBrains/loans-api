@@ -3,6 +3,7 @@ from sqlmodel import SQLModel
 
 T = TypeVar("T")
 
+
 class ResponseModel(SQLModel, Generic[T]):
     count: int
     next: str | None = None

@@ -40,7 +40,9 @@ async def create_loan_entry(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await LoanEntriesService.create_loan_entry(data=data, session=session)
+    return await LoanEntriesService.create_loan_entry(
+        data=data, session=session, current_user=current_user
+    )
 
 
 @router.put("/{id}", response_model=LoanEntriesRead, status_code=status.HTTP_200_OK)
@@ -50,7 +52,9 @@ async def update_loan_entry(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await LoanEntriesService.update_loan_entry(id=id, data=data, session=session)
+    return await LoanEntriesService.update_loan_entry(
+        id=id, data=data, session=session, current_user=current_user
+    )
 
 
 @router.delete("/{id}", response_model={}, status_code=status.HTTP_204_NO_CONTENT)

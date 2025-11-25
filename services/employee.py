@@ -4,15 +4,18 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models.employee import Employee
+from models.user import User
 from schemas.employee import EmployeeCreate, EmployeeUpdate
 from schemas.base import ResponseModel
 
 
 class EmployeeService:
     @staticmethod
-    async def create_employee(data: EmployeeCreate, session: AsyncSession):
+    async def create_employee(
+        data: EmployeeCreate, session: AsyncSession, current_user: User
+    ):
         fullname = Employee.get_fullname(data)
-        extra_fields = {"fullname": fullname}
+        extra_fields = {"fullname": fullname, "user_id": current_user.id}
         employee = Employee.model_validate(data, update=extra_fields)
 
         session.add(employee)
@@ -35,7 +38,9 @@ class EmployeeService:
         return employee
 
     @staticmethod
-    async def update_employee(id: UUID, data: EmployeeUpdate, session: AsyncSession):
+    async def update_employee(
+        id: UUID, data: EmployeeUpdate, session: AsyncSession, current_user: User
+    ):
         employee = await EmployeeService.get_employee(id=id, session=session)
         employee_data = data.model_dump(exclude_unset=True)
 
@@ -43,6 +48,7 @@ class EmployeeService:
             if value:
                 setattr(employee, key, value)
 
+        employee.modified_by_id = current_user.id
         session.add(employee)
         await session.commit()
         await session.refresh(employee)

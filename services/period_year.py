@@ -7,6 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 from models.period_year import PeriodYear, Period
+from models.user import User
 from schemas.base import ResponseModel
 from schemas.period_year import (
     PeriodCreate,
@@ -23,8 +24,12 @@ from utils.helper import (
 
 class PeriodYearService:
     @staticmethod
-    async def create_period_year(data: PeriodYearCreate, session: AsyncSession):
-        period_year = PeriodYear.model_validate(data)
+    async def create_period_year(
+        data: PeriodYearCreate, session: AsyncSession, current_user: User
+    ):
+        period_year = PeriodYear.model_validate(
+            data, update={"user_id": current_user.id}
+        )
 
         session.add(period_year)
         await session.commit()
@@ -55,7 +60,7 @@ class PeriodYearService:
                     "month_calender": calender,
                     "year": period_year.year,
                     "company_id": period_year.company_id,
-                    "user_id": period_year.user_id,
+                    "user_id": current_user.id,
                     "period_code": period_code,
                     "period_name": period_name,
                     "start_date": start_date,

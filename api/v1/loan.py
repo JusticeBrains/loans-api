@@ -37,7 +37,9 @@ async def create_loan(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await LoanService.create_loan(data=data, session=session)
+    return await LoanService.create_loan(
+        data=data, session=session, current_user=current_user
+    )
 
 
 @router.patch("/{id}", response_model=LoanRead, status_code=status.HTTP_200_OK)
@@ -47,7 +49,9 @@ async def update_loan(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await LoanService.update_loan(id=id, data=data, session=session)
+    return await LoanService.update_loan(
+        id=id, data=data, session=session, current_user=current_user
+    )
 
 
 @router.delete("/{id}", response_model={}, status_code=status.HTTP_204_NO_CONTENT)

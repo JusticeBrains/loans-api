@@ -20,7 +20,9 @@ async def create_employee(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await EmployeeService.create_employee(data=data, session=session)
+    return await EmployeeService.create_employee(
+        data=data, session=session, current_user=current_user
+    )
 
 
 @router.get("/{id}", response_model=EmployeeRead, status_code=HTTP_200_OK)
@@ -52,7 +54,9 @@ async def update_employee(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    return await EmployeeService.update_employee(id=id, data=data, session=session)
+    return await EmployeeService.update_employee(
+        id=id, data=data, session=session, current_user=current_user
+    )
 
 
 @router.delete("/{id}", response_model={}, status_code=status.HTTP_204_NO_CONTENT)

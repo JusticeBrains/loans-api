@@ -26,6 +26,7 @@ class Employee(SQLModel, table=True):
     company_name: str = Field(sa_column=Column(String(50), nullable=False, index=True))
 
     user_id: uuid.UUID | None = Field(foreign_key="users.id", nullable=True)
+    modified_by_id: uuid.UUID | None = Field(foreign_key="users.id", nullable=True)
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(

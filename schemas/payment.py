@@ -26,7 +26,7 @@ class PaymentBase(SQLModel):
 
     company_id: UUID
     company_name: str | None = None
-    user_id: UUID
+    user_id: UUID | None = None
     user_name: str | None = None
     is_deleted: bool = False
 
