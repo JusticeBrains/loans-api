@@ -20,7 +20,6 @@ class PaymentService:
     @staticmethod
     async def create_payment(data: PaymentCreate, session: AsyncSession):
         try:
-
             loan_entry = await LoanEntriesService.get_loan_entry(
                 id=data.loan_entry_id, session=session
             )
@@ -109,12 +108,16 @@ class PaymentService:
                     if amount_paid <= 0:
                         break
 
-                    amount_left = schedule.monthly_payment - (schedule.amount_paid or Decimal(0))
+                    amount_left = schedule.monthly_payment - (
+                        schedule.amount_paid or Decimal(0)
+                    )
                     amount_to_pay = min(amount_paid, amount_left)
                     if amount_to_pay <= 0:
                         continue
 
-                    schedule_amount_paid = amount_to_pay + (schedule.amount_paid or Decimal(0))
+                    schedule_amount_paid = amount_to_pay + (
+                        schedule.amount_paid or Decimal(0)
+                    )
                     difference = schedule.monthly_payment - schedule_amount_paid
 
                     if schedule_amount_paid >= schedule.monthly_payment:
@@ -138,7 +141,7 @@ class PaymentService:
                     total_paid += amount_to_pay
                     amount_paid -= amount_to_pay
 
-                current_total_payment = (loan_entry.total_amount_paid or Decimal(0))
+                current_total_payment = loan_entry.total_amount_paid or Decimal(0)
                 new_total_payment = current_total_payment + total_paid
                 new_remaining = loan_entry.amount - new_total_payment
 
