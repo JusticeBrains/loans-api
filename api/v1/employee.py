@@ -1,4 +1,3 @@
-import re
 from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlmodel.ext.asyncio.session import AsyncSession
