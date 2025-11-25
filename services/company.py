@@ -9,7 +9,6 @@ from schemas.base import ResponseModel
 
 
 class CompanyService:
-
     @staticmethod
     async def create_company(data: CompanyCreate, session: AsyncSession):
         company = Company(**data.model_dump())
