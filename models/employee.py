@@ -17,7 +17,9 @@ class Employee(SQLModel, table=True):
     firstname: str = Field(sa_column=Column(String(80), nullable=False, index=True))
     lastname: str = Field(sa_column=Column(String(80), nullable=False))
     middlename: str | None = Field(sa_column=Column(String(80), nullable=True))
-    fullname: str | None = Field(sa_column=Column(String(150), nullable=True, default=None))
+    fullname: str | None = Field(
+        sa_column=Column(String(150), nullable=True, default=None)
+    )
     national_id: str | None = Field(sa_column=Column(String(15), nullable=True))
 
     company_id: uuid.UUID = Field(foreign_key="companies.id", nullable=False)
