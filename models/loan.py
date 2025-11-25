@@ -27,20 +27,20 @@ class Loan(SQLModel, table=True):
 
     interest_term: str = Field(
         sa_column=Column(
-            Enum(InterestTerm, native_enum=False),
+            Enum(InterestTerm,name="interest_term_enum", native_enum=True),
             nullable=True,
             default=InterestTerm.PER_ANNUM,
         )
     )
     calculation_type: str = Field(
         sa_column=Column(
-            Enum(InterestCalculationType, native_enum=False),
+            Enum(InterestCalculationType,name="interest_calculation_type_enum", native_enum=True),
             nullable=True,
             default=InterestCalculationType.STRAIGHT_LINE,
         )
     )
 
-    min_amount: Decimal | None  = Field(
+    min_amount: Decimal | None = Field(
         sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
     max_amount: Decimal | None = Field(
@@ -50,7 +50,9 @@ class Loan(SQLModel, table=True):
         sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
 
-    company_id: UUID | None = Field(foreign_key="companies.id", nullable=True, default=None)
+    company_id: UUID | None = Field(
+        foreign_key="companies.id", nullable=True, default=None
+    )
 
     user_id: UUID | None = Field(
         foreign_key="users.id", nullable=True, index=True, default=None
@@ -87,7 +89,9 @@ class LoanEntries(SQLModel, table=True):
     employee_fullname: str | None = Field(
         sa_column=Column(String(255), nullable=True, default=None)
     )
-    national_id: str | None = Field(sa_column=Column(String(20), nullable=True, default=None))
+    national_id: str | None = Field(
+        sa_column=Column(String(20), nullable=True, default=None)
+    )
 
     user_id: UUID | None = Field(foreign_key="users.id", nullable=True, default=None)
 
@@ -97,14 +101,14 @@ class LoanEntries(SQLModel, table=True):
 
     calculation_type: InterestCalculationType | None = Field(
         sa_column=Column(
-            Enum(InterestCalculationType, native_enum=False),
+            Enum(InterestCalculationType,name="interest_calculation_type_enum", native_enum=True),
             nullable=True,
             default=None,
         )
     )
     interest_term: InterestTerm | None = Field(
         sa_column=Column(
-            Enum(InterestTerm, native_enum=False), nullable=True, default=None
+            Enum(InterestTerm,name="interest_term_enum", native_enum=True), nullable=True, default=None
         )
     )
 
