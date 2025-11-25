@@ -65,7 +65,7 @@ class PaymentService:
             session.add(payment)
             await session.flush()
 
-            if payment.payment_type == PaymentType.DEFAULT:
+            if payment.payment_type == PaymentType.Default:
                 current_total_payment = (
                     loan_entry.total_amount_paid if loan_entry.total_amount_paid else 0
                 )
@@ -100,7 +100,7 @@ class PaymentService:
                     loan_entry.closed = True
                     loan_entry.status = False
 
-            elif payment.payment_type == PaymentType.CUSTOM:
+            elif payment.payment_type == PaymentType.Custom:
                 amount_paid = payment.amount_paid
                 total_paid = 0
 

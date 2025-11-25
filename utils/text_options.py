@@ -16,5 +16,5 @@ class InterestTerm(StrEnum):
 
 
 class PaymentType(StrEnum):
-    DEFAULT = "Default"
-    CUSTOM = "Custom"
+    Default = "Default"
+    Custom = "Custom"
