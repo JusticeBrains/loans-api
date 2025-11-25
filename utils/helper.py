@@ -114,19 +114,17 @@ async def get_sorted_schedules_and_min_month(
     return schedules, min_month
 
 
-async def delete_payment_by_loan_entry_id(
-        loan_entry_id: UUID, session: AsyncSession
-    ):
-        query = select(Payment).where(Payment.loan_entry_id == loan_entry_id)
-        result = await session.exec(query)
+async def delete_payment_by_loan_entry_id(loan_entry_id: UUID, session: AsyncSession):
+    query = select(Payment).where(Payment.loan_entry_id == loan_entry_id)
+    result = await session.exec(query)
 
-        payments = result.unique().all()
+    payments = result.unique().all()
 
-        for payment in payments:
-            payment.is_deleted = True
-            session.add(payment)
+    for payment in payments:
+        payment.is_deleted = True
+        session.add(payment)
 
-        session.commit()
-        session.refresh(payments)
+    session.commit()
+    session.refresh(payments)
 
-        return {}
+    return {}
