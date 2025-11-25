@@ -9,7 +9,6 @@ from schemas.base import ResponseModel
 
 
 class EmployeeService:
-
     @staticmethod
     async def create_employee(data: EmployeeCreate, session: AsyncSession):
         fullname = Employee.get_fullname(data)
@@ -51,7 +50,12 @@ class EmployeeService:
         return employee
 
     @staticmethod
-    async def get_employees(session: AsyncSession, company_id: UUID | None = None,limit: int = 10, offset: int = 0):
+    async def get_employees(
+        session: AsyncSession,
+        company_id: UUID | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ):
         query = (
             select(Employee)
             .order_by(Employee.code)
