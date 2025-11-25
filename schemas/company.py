@@ -14,5 +14,6 @@ class CompanyRead(SQLModel):
     created_at: datetime
     updated_at: datetime
 
+
 class CompanyUpdate(SQLModel):
     name: str
