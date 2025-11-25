@@ -2,7 +2,7 @@ import multiprocessing
 import os
 
 
-bind = "0.0.0.0:8000"
+bind = "unix:/run/gunicorn.sock"
 
 workers_per_core = float(os.getenv("WORKERS_PER_CORE", "1"))
 cores = multiprocessing.cpu_count()
