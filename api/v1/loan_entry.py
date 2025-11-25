@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from config.dependencies import get_current_user
-from models.loan import LoanEntries
 from models.user import User
 from schemas.base import ResponseModel
 from services.loan import LoanEntriesService
