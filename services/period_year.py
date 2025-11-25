@@ -22,7 +22,6 @@ from utils.helper import (
 
 
 class PeriodYearService:
-
     @staticmethod
     async def create_period_year(data: PeriodYearCreate, session: AsyncSession):
         period_year = PeriodYear.model_validate(data)
