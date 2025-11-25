@@ -6,18 +6,21 @@ from sqlmodel import SQLModel
 from models import company
 
 
-class UserCreate(SQLModel):
+class UserBase(SQLModel):
     email: str
     firstname: str
     lastname: str
     middlename: str | None = None
-    password: str
     pin: str | None = None
     company_id: uuid.UUID
     is_super: int = 0
 
 
-class UserRead(UserCreate):
+class UserCreate(UserBase):
+    password: str
+
+
+class UserRead(UserBase):
     id: uuid.UUID
     is_password_changed: bool
     is_password_reset: bool
