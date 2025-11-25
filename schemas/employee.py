@@ -8,7 +8,7 @@ class EmployeeBase(SQLModel):
     firstname: str
     lastname: str
     middlename: str | None = None
-    company_id: uuid.UUID 
+    company_id: uuid.UUID
     user_id: uuid.UUID | None = None
     national_id: str | None = None
 
