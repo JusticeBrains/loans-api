@@ -17,7 +17,6 @@ from utils.helper import defualt_schedule_generation, delete_payment_by_loan_ent
 
 
 class LoanService:
-
     @staticmethod
     async def create_loan(data: LoanCreate, session: AsyncSession):
         loan = Loan.model_validate(data)
@@ -85,7 +84,6 @@ class LoanService:
 
 
 class LoanEntriesService:
-
     @staticmethod
     async def create_loan_entry(data: LoanEntriesCreate, session: AsyncSession):
         deduction_period: date | None = None
