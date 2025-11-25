@@ -1,7 +1,17 @@
 from uuid import UUID, uuid4
 
 from datetime import datetime, date
-from sqlmodel import JSON, Column, Identity, Integer, SQLModel, Field, Date, String, UniqueConstraint
+from sqlmodel import (
+    JSON,
+    Column,
+    Identity,
+    Integer,
+    SQLModel,
+    Field,
+    Date,
+    String,
+    UniqueConstraint,
+)
 
 
 from models.company import Company
@@ -15,10 +25,18 @@ class PeriodYear(SQLModel, table=True):
         default=None,
         sa_column=Column(
             Integer,
-            Identity(always=False, start=1, increment=1, minvalue=1, maxvalue=2147483647, cycle=False, cache=1),
+            Identity(
+                always=False,
+                start=1,
+                increment=1,
+                minvalue=1,
+                maxvalue=2147483647,
+                cycle=False,
+                cache=1,
+            ),
             primary_key=True,
-            nullable=False
-        )
+            nullable=False,
+        ),
     )
     year: int = Field(sa_column=Column(Integer, nullable=False))
 
