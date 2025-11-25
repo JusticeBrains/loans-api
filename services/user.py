@@ -62,9 +62,10 @@ class UserService:
         )
         result = await session.exec(query)
         users = result.unique().all()
-        count = len(users)
+        users_read = [UserRead.model_validate(user) for user in users]
+        count = len(users_read)
 
-        return ResponseModel(count=count, results=users)
+        return ResponseModel(count=count, results=users_read)
 
     @staticmethod
     async def update_user(id: UUID, data: UserUpdate, session: AsyncSession):
