@@ -16,7 +16,6 @@ from config.settings import REQUESTS_PER_MINUTE
 
 
 class UserService:
-
     @staticmethod
     async def create_user(data: UserCreate, session: AsyncSession) -> UserRead:
         hashed_password = hash_password(data.password)
