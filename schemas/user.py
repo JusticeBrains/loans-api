@@ -22,6 +22,7 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: uuid.UUID
+    username: str
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
