@@ -15,6 +15,7 @@ from services.employee import EmployeeService
 from services.payment_schedule import PaymentScheduleService
 from services.period_year import PeriodService
 from utils.helper import defualt_schedule_generation, delete_payment_by_loan_entry_id
+from utils.text_options import InterestCalculationType, InterestTerm
 
 
 class LoanService:
@@ -45,10 +46,29 @@ class LoanService:
         return loan
 
     @staticmethod
-    async def get_loans(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_loans(
+        session: AsyncSession,
+        code: str | None = None,
+        name: str | None = None,
+        interest_term: InterestTerm | None = None,
+        calculation_type: InterestCalculationType | None = None,
+        company_id: UUID | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ):
         query = (
             select(Loan).order_by(Loan.name).limit(limit=limit).offset(offset=offset)
         )
+        if code:
+            query = query.where(Loan.code == code)
+        if name:
+            query = query.where(Loan.name == name)
+        if interest_term:
+            query = query.where(Loan.interest_term == interest_term)
+        if calculation_type:
+            query = query.where(Loan.calculation_type == calculation_type)
+        if company_id:
+            query = query.where(Loan.company_id == company_id)
         result = await session.exec(query)
 
         loans = result.unique().all()
@@ -161,7 +181,22 @@ class LoanEntriesService:
 
     @staticmethod
     async def get_loan_entries(
-        session: AsyncSession, id: UUID | None = None, limit: int = 10, offset: int = 0
+        session: AsyncSession,
+        id: UUID | None = None,
+        code: str | None = None,
+        employee_id: UUID | None = None,
+        employee_code: str | None = None,
+        employee_fullname: str | None = None,
+        national_id: str | None = None,
+        loan_id: UUID | None = None,
+        loan_name: str | None = None,
+        description: str | None = None,
+        interest_term: InterestTerm | None = None,
+        calculation_type: InterestCalculationType | None = None,
+        # company_id: UUID | None = None,
+        exclude: bool | None = None,
+        limit: int = 10,
+        offset: int = 0,
     ):
         query = (
             select(LoanEntries)
@@ -171,6 +206,30 @@ class LoanEntriesService:
         )
         if id:
             query = query.where(LoanEntries.id == id)
+        if code:
+            query = query.where(LoanEntries.code == code)
+        if employee_id:
+            query = query.where(LoanEntries.employee_id == employee_id)
+        if employee_code:
+            query = query.where(LoanEntries.employee_code == employee_code)
+        if employee_fullname:
+            query = query.where(LoanEntries.employee_fullname == employee_fullname)
+        if national_id:
+            query = query.where(LoanEntries.national_id == national_id)
+        if loan_id:
+            query = query.where(LoanEntries.loan_id == loan_id)
+        if loan_name:
+            query = query.where(LoanEntries.loan_name == loan_name)
+        if description:
+            query = query.where(LoanEntries.description == description)
+        if interest_term:
+            query = query.where(LoanEntries.interest_term == interest_term)
+        if calculation_type:
+            query = query.where(LoanEntries.calculation_type == calculation_type)
+        # if company_id:
+        #     query = query.where(LoanEntries.company_id == company_id)
+        if exclude:
+            query = query.where(LoanEntries.exclude == exclude)
         result = await session.exec(query)
 
         loan_entries = result.unique().all()

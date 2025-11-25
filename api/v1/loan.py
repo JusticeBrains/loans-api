@@ -9,6 +9,7 @@ from models.user import User
 from schemas.loan import LoanCreate, LoanRead, LoanUpdate
 from services.loan import LoanService
 from schemas.base import ResponseModel
+from utils.text_options import InterestCalculationType, InterestTerm
 
 
 router = APIRouter(prefix="/loans", tags=["loans"])
@@ -18,8 +19,24 @@ router = APIRouter(prefix="/loans", tags=["loans"])
 async def get_loans(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
+    code: str | None = None,
+    name: str | None = None,
+    interest_term: InterestTerm | None = None,
+    calculation_type: InterestCalculationType | None = None,
+    company_id: UUID | None = None,
+    limit: int = 10,
+    offset: int = 0,
 ):
-    return await LoanService.get_loans(session=session)
+    return await LoanService.get_loans(
+        session=session,
+        code=code,
+        name=name,
+        interest_term=interest_term,
+        calculation_type=calculation_type,
+        company_id=company_id,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/{id}", response_model=LoanRead, status_code=status.HTTP_200_OK)

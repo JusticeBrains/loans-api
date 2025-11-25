@@ -17,10 +17,22 @@ router = APIRouter(prefix="/period", tags=["periods"])
 async def get_periods(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
+    period_year_id: int | None = None,
+    period_code: str | None = None,
+    period_name: str | None = None,
+    company_id: UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
-    return await PeriodService.get_periods(session=session, limit=limit, offset=offset)
+    return await PeriodService.get_periods(
+        session=session,
+        period_year_id=period_year_id,
+        period_code=period_code,
+        period_name=period_name,
+        company_id=company_id,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.get("/{id}", response_model=PeriodRead, status_code=status.HTTP_200_OK)

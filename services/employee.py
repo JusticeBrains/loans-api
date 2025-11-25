@@ -59,6 +59,13 @@ class EmployeeService:
     async def get_employees(
         session: AsyncSession,
         company_id: UUID | None = None,
+        code: str | None = None,
+        firstname: str | None = None,
+        lastname: str | None = None,
+        middlename: str | None = None,
+        company_name: str | None = None,
+        fullname: str | None = None,
+        national_id: str | None = None,
         limit: int = 10,
         offset: int = 0,
     ):
@@ -71,6 +78,27 @@ class EmployeeService:
 
         if company_id:
             query = query.where(Employee.company_id == company_id)
+
+        if code:
+            query = query.where(Employee.code == code)
+
+        if firstname:
+            query = query.where(Employee.firstname == firstname)
+
+        if lastname:
+            query = query.where(Employee.lastname == lastname)
+
+        if middlename:
+            query = query.where(Employee.middlename == middlename)
+
+        if company_name:
+            query = query.where(Employee.company_name == company_name)
+
+        if fullname:
+            query = query.where(Employee.fullname == fullname)
+
+        if national_id:
+            query = query.where(Employee.national_id == national_id)
 
         results = await session.exec(query)
         all_employees = results.unique().all()

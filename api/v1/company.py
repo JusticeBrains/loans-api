@@ -37,11 +37,12 @@ async def get_company(
 async def get_companies(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
+    name: str | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
     return await CompanyService.get_companies(
-        session=session, limit=limit, offset=offset
+        session=session, name=name, limit=limit, offset=offset
     )
 
 

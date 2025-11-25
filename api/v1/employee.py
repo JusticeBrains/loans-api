@@ -39,11 +39,28 @@ async def get_employees(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
     company_id: UUID | None = None,
+    code: str | None = None,
+    firstname: str | None = None,
+    lastname: str | None = None,
+    middlename: str | None = None,
+    company_name: str | None = None,
+    fullname: str | None = None,
+    national_id: str | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
     return await EmployeeService.get_employees(
-        session=session, company_id=company_id, limit=limit, offset=offset
+        session=session,
+        company_id=company_id,
+        code=code,
+        firstname=firstname,
+        lastname=lastname,
+        middlename=middlename,
+        company_name=company_name,
+        fullname=fullname,
+        national_id=national_id,
+        limit=limit,
+        offset=offset,
     )
 
 

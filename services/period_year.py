@@ -92,13 +92,24 @@ class PeriodYearService:
         return period_year
 
     @staticmethod
-    async def get_periods(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_periods(
+        session: AsyncSession,
+        year: int | None = None,
+        company_id: UUID | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ):
         query = (
             select(PeriodYear)
             .order_by(PeriodYear.year.desc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
+
+        if year:
+            query = query.where(PeriodYear.year == year)
+        if company_id:
+            query = query.where(PeriodYear.company_id == company_id)
 
         results = await session.exec(query)
         periods = results.unique().all()
@@ -138,13 +149,31 @@ class PeriodService:
         return period
 
     @staticmethod
-    async def get_periods(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_periods(
+        session: AsyncSession,
+        period_code: str | None = None,
+        period_name: str | None = None,
+        company_id: UUID | None = None,
+        period_year_id: int | None = None,
+        limit: int = 10,
+        offset: int = 0,
+    ):
         query = (
             select(Period)
             .order_by(Period.period_code.desc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
+
+        if period_code:
+            query = query.where(Period.period_code == period_code)
+        if period_name:
+            query = query.where(Period.period_name == period_name)
+        if company_id:
+            query = query.where(Period.company_id == company_id)
+        if period_year_id:
+            query = query.where(Period.period_year_id == period_year_id)
+
         results = await session.exec(query)
         periods = results.unique().all()
 

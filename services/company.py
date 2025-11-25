@@ -1,3 +1,4 @@
+from pickle import NONE
 from uuid import UUID
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -20,13 +21,18 @@ class CompanyService:
         return company
 
     @staticmethod
-    async def get_companies(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_companies(
+        session: AsyncSession, name: str | None = None, limit: int = 10, offset: int = 0
+    ):
         query = (
             select(Company)
             .order_by(Company.created_at.desc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
+
+        if name:
+            query = query.where(Company.name == name)
 
         results = await session.exec(query)
         companies = results.unique().all()

@@ -17,7 +17,6 @@ class LoanBase(SQLModel):
     min_amount: Decimal | None = None
     max_amount: Decimal | None = None
     interest_rate: Decimal | None = None
-    exclude: bool | None = False
     company_id: UUID
     user_id: UUID
 
@@ -28,6 +27,7 @@ class LoanCreate(LoanBase):
 
 class LoanRead(LoanBase):
     id: UUID
+    exclude: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -35,6 +35,7 @@ class LoanRead(LoanBase):
 class LoanUpdate(SQLModel):
     code: str | None = None
     name: str | None = None
+    exclude: bool | None = None
     interest_term: str | None = None
     calculation_type: str | None = None
     min_amount: Decimal | None = None
@@ -67,9 +68,6 @@ class LoanEntriesBase(SQLModel):
     deduction_start_period_name: str | None = None
     deduction_start_period_code: str | None = None
     deduction_end_date: date | None = None
-    closed: bool = False
-    status: bool = True
-    exclude: bool = False
 
 
 class LoanEntriesCreate(LoanEntriesBase):
@@ -77,10 +75,15 @@ class LoanEntriesCreate(LoanEntriesBase):
 
 
 class LoanEntriesUpdate(LoanEntriesBase):
-    pass
+    closed: bool = False
+    status: bool = True
+    exclude: bool = False
 
 
 class LoanEntriesRead(LoanEntriesBase):
     id: UUID
+    closed: bool = False
+    status: bool = True
+    exclude: bool = False
     created_at: datetime
     updated_at: datetime
