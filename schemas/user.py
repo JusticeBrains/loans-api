@@ -25,8 +25,8 @@ class UserRead(UserBase):
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
-    created_at: datetime
-    updated_at: datetime
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class UserUpdate(UserCreate):
