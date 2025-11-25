@@ -12,7 +12,7 @@ class UserBase(SQLModel):
     lastname: str
     middlename: str | None = None
     pin: str | None = None
-    company_id: uuid.UUID
+    company_id: uuid.UUID | None = None
     is_super: int = 0
 
 
@@ -25,7 +25,6 @@ class UserRead(UserBase):
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
-    company: company.Company
     created_at: datetime
     updated_at: datetime
 
