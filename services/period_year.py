@@ -60,7 +60,6 @@ class PeriodYearService:
                         "month": month,
                         "month_calender": calender,
                         "year": period_year.year,
-                        "company_id": period_year.company_id,
                         "user_id": current_user.id,
                         "period_code": period_code,
                         "period_name": period_name,
@@ -98,7 +97,6 @@ class PeriodYearService:
     async def get_periods(
         session: AsyncSession,
         year: int | None = None,
-        company_id: UUID | None = None,
         limit: int = 10,
         offset: int = 0,
     ):
@@ -111,8 +109,6 @@ class PeriodYearService:
 
         if year:
             query = query.where(PeriodYear.year == year)
-        if company_id:
-            query = query.where(PeriodYear.company_id == company_id)
 
         results = await session.exec(query)
         periods = results.unique().all()
@@ -156,7 +152,6 @@ class PeriodService:
         session: AsyncSession,
         period_code: str | None = None,
         period_name: str | None = None,
-        company_id: UUID | None = None,
         period_year_id: int | None = None,
         limit: int = 10,
         offset: int = 0,
@@ -172,8 +167,6 @@ class PeriodService:
             query = query.where(Period.period_code == period_code)
         if period_name:
             query = query.where(Period.period_name == period_name)
-        if company_id:
-            query = query.where(Period.company_id == company_id)
         if period_year_id:
             query = query.where(Period.period_year_id == period_year_id)
 

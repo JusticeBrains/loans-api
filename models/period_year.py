@@ -20,7 +20,7 @@ from models.company import Company
 
 class PeriodYear(SQLModel, table=True):
     __tablename__ = "period_years"
-    __table_args__ = (UniqueConstraint("year", "company_id"),)
+    # __table_args__ = (UniqueConstraint("year", "company_id"),)
 
     id: int | None = Field(
         default=None,
@@ -40,8 +40,6 @@ class PeriodYear(SQLModel, table=True):
         ),
     )
     year: int = Field(sa_column=Column(Integer, nullable=False))
-
-    company_id: UUID = Field(foreign_key="companies.id", nullable=False, index=True)
 
     user_id: UUID | None = Field(foreign_key="users.id", nullable=True, default=None)
 
@@ -69,8 +67,6 @@ class Period(SQLModel, table=True):
     total_working_days: int = Field(sa_column=Column(Integer, nullable=False))
     total_working_hours: int = Field(sa_column=Column(Integer, nullable=False))
     total_hours_per_day: int = Field(sa_column=Column(Integer, nullable=False))
-
-    company_id: UUID = Field(foreign_key="companies.id", nullable=False, index=True)
 
     period_year_id: int = Field(
         foreign_key="period_years.id", nullable=False, index=True

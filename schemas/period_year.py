@@ -6,7 +6,6 @@ from sqlmodel import SQLModel
 
 class PeriodYearBase(SQLModel):
     year: int
-    company_id: UUID
 
 
 class PeriodYearCreate(PeriodYearBase):
@@ -37,7 +36,6 @@ class PeriodBase(SQLModel):
     total_working_days: int
     total_working_hours: int
     total_hours_per_day: int
-    company_id: UUID
     period_year_id: int
     user_id: UUID | None = None
 
@@ -58,7 +56,6 @@ class PeriodRead(SQLModel):
     total_working_days: int
     total_working_hours: int
     total_hours_per_day: int
-    company_id: UUID | None = None
     period_year_id: int
     user_id: UUID | None = None
     created_at: datetime

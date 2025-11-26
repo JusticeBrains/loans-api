@@ -3,6 +3,7 @@ import calendar
 import math
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 
@@ -65,39 +66,42 @@ async def defualt_schedule_generation(
     data: LoanEntriesCreate,
     session: AsyncSession,
 ):
-    if isinstance(start_date, date):
-        if data.amount and data.monthly_repayment:
-            duration = data.amount / data.monthly_repayment
-            data.duration = duration
-            data.monthly_repayment = data.amount / duration
+    try:
+        if isinstance(start_date, date):
+            if data.amount and data.monthly_repayment:
+                duration = data.amount / data.monthly_repayment
+                data.duration = duration
+                data.monthly_repayment = data.amount / duration
 
-        if data.amount and data.duration:
-            data.monthly_repayment = data.amount / data.duration
+            if data.amount and data.duration:
+                data.monthly_repayment = data.amount / data.duration
 
-        if data.amount and data.duration and data.monthly_repayment:
-            amount_left = data.amount
-            for month in range(1, math.ceil(data.duration) + 1):
-                monthly_amount = min(amount_left, data.monthly_repayment)
-                amount_left = round(amount_left - monthly_amount, 4)
-                await PaymentScheduleService.create_schedule(
-                    data=PaymentScheduleCreate(
-                        loan_entry_id=loan_id.id,
-                        month=month,
-                        employee_id=loan_id.employee_id,
-                        employee_code=loan_id.employee_code,
-                        employee_fullname=loan_id.employee_fullname,
-                        monthly_payment=monthly_amount,
-                        balance_bf=amount_left + monthly_amount,
-                        balance=amount_left,
-                        # company_id=loan_id.company_id,
-                        # company_name=loan_id.company_name,
-                        user_id=loan_id.user_id,
-                        # user_name=loan_id.user_name,
-                    ),
-                    session=session,
-                )
-                if amount_left <= 0:
-                    break
+            if data.amount and data.duration and data.monthly_repayment:
+                amount_left = data.amount
+                for month in range(1, math.ceil(data.duration) + 1):
+                    monthly_amount = min(amount_left, data.monthly_repayment)
+                    amount_left = round(amount_left - monthly_amount, 4)
+                    await PaymentScheduleService.create_schedule(
+                        data=PaymentScheduleCreate(
+                            loan_entry_id=loan_id.id,
+                            month=month,
+                            employee_id=loan_id.employee_id,
+                            employee_code=loan_id.employee_code,
+                            employee_fullname=loan_id.employee_fullname,
+                            monthly_payment=monthly_amount,
+                            balance_bf=amount_left + monthly_amount,
+                            balance=amount_left,
+                            # company_id=loan_id.company_id,
+                            # company_name=loan_id.company_name,
+                            user_id=loan_id.user_id,
+                            # user_name=loan_id.user_name,
+                        ),
+                        session=session,
+                    )
+                    if amount_left <= 0:
+                        break
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 async def get_sorted_schedules_and_min_month(
