@@ -56,6 +56,7 @@ class LoanEntriesBase(SQLModel):
     national_id: str | None = None
     user_id: UUID | None = None
     company_id: UUID | None = None
+    company_name: str | None = None
     calculation_type: InterestCalculationType | None = None
     interest_term: InterestTerm | None = None
     periodic_principal: Decimal | None = None
