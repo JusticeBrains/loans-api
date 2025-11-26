@@ -2,6 +2,7 @@ from uuid import UUID, uuid4
 
 from datetime import datetime, date
 from sqlmodel import (
+    BIGINT,
     JSON,
     Column,
     Identity,
@@ -24,7 +25,7 @@ class PeriodYear(SQLModel, table=True):
     id: int | None = Field(
         default=None,
         sa_column=Column(
-            Integer,
+            BIGINT,
             Identity(
                 always=False,
                 start=1,
