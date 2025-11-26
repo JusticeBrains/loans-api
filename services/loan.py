@@ -21,15 +21,18 @@ from utils.text_options import InterestCalculationType, InterestTerm
 class LoanService:
     @staticmethod
     async def create_loan(data: LoanCreate, session: AsyncSession, current_user: User):
-        data = data.model_dump()
-        data["user_id"] = current_user.id
-        loan = Loan.model_validate(data)
+        try:
+            data = data.model_dump()
+            data["user_id"] = current_user.id
+            loan = Loan.model_validate(data)
 
-        session.add(loan)
-        await session.commit()
-        await session.refresh(loan)
+            session.add(loan)
+            await session.commit()
+            await session.refresh(loan)
 
-        return loan
+            return loan
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def get_loan(id: UUID, session: AsyncSession):
@@ -114,70 +117,75 @@ class LoanEntriesService:
     async def create_loan_entry(
         data: LoanEntriesCreate, session: AsyncSession, current_user: User
     ):
-        deduction_period: date | None = None
-        if not data.calculation_type:
-            if data.deduction_start_period_id:
-                deduction_period = await PeriodService.get_period(
-                    id=data.deduction_start_period_id, session=session
-                )
-                if not deduction_period:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail="Period not found"
+        try:
+            deduction_period: date | None = None
+            if not data.calculation_type:
+                if data.deduction_start_period_id:
+                    deduction_period = await PeriodService.get_period(
+                        id=data.deduction_start_period_id, session=session
                     )
-                data.deduction_start_period_name = deduction_period.period_name
-                data.deduction_start_period_code = deduction_period.period_code
-                if isinstance(deduction_period.start_date, date):
-                    duration_in_months = math.ceil(data.duration)
-                    data.deduction_end_date = (
-                        deduction_period.start_date
-                        + relativedelta(months=duration_in_months - 1)
-                    )
-                else:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Deduction start period is required",
-                    )
+                    if not deduction_period:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Period not found",
+                        )
+                    data.deduction_start_period_name = deduction_period.period_name
+                    data.deduction_start_period_code = deduction_period.period_code
+                    if isinstance(deduction_period.start_date, date):
+                        duration_in_months = math.ceil(data.duration)
+                        data.deduction_end_date = (
+                            deduction_period.start_date
+                            + relativedelta(months=duration_in_months - 1)
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Deduction start period is required",
+                        )
 
-        if data.employee_id:
-            employee = await EmployeeService.get_employee(
-                id=data.employee_id, session=session
+            if data.employee_id:
+                employee = await EmployeeService.get_employee(
+                    id=data.employee_id, session=session
+                )
+                if not employee:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Employee not found",
+                    )
+                data.employee_code = employee.code
+                data.employee_fullname = employee.fullname
+                data.national_id = employee.national_id
+
+            if data.loan_id:
+                loan = await LoanService.get_loan(id=data.loan_id, session=session)
+                if not loan:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                    )
+                data.code = loan.code
+                data.description = loan.name
+                data.loan_name = loan.name
+
+            data.user_id = current_user.id
+
+            loan_entry = LoanEntries.model_validate(data)
+            session.add(loan_entry)
+
+            await session.flush()
+
+            await defualt_schedule_generation(
+                start_date=deduction_period.start_date,
+                loan_id=loan_entry,
+                data=data,
+                session=session,
             )
-            if not employee:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found"
-                )
-            data.employee_code = employee.code
-            data.employee_fullname = employee.fullname
-            data.national_id = employee.national_id
 
-        if data.loan_id:
-            loan = await LoanService.get_loan(id=data.loan_id, session=session)
-            if not loan:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
-                )
-            data.code = loan.code
-            data.description = loan.name
-            data.loan_name = loan.name
+            await session.commit()
+            await session.refresh(loan_entry)
 
-        data.user_id = current_user.id
-
-        loan_entry = LoanEntries.model_validate(data)
-        session.add(loan_entry)
-
-        await session.flush()
-
-        await defualt_schedule_generation(
-            start_date=deduction_period.start_date,
-            loan_id=loan_entry,
-            data=data,
-            session=session,
-        )
-
-        await session.commit()
-        await session.refresh(loan_entry)
-
-        return loan_entry
+            return loan_entry
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def get_loan_entries(

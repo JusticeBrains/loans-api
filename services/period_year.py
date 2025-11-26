@@ -27,55 +27,58 @@ class PeriodYearService:
     async def create_period_year(
         data: PeriodYearCreate, session: AsyncSession, current_user: User
     ):
-        period_year = PeriodYear.model_validate(
-            data, update={"user_id": current_user.id}
-        )
+        try:
+            period_year = PeriodYear.model_validate(
+                data, update={"user_id": current_user.id}
+            )
 
-        session.add(period_year)
-        await session.commit()
-        await session.refresh(period_year)
+            session.add(period_year)
+            await session.commit()
+            await session.refresh(period_year)
 
-        month_calender = generate_calender(period_year.year)
-        for month, calender in month_calender.items():
-            if calender:
-                first_day = calender[0][0]
-                last_week = calender[-1]
-                last_day = last_week[-1] if last_week[-1] != 0 else last_week[-2]
-                days_in_month = get_days_in_month(year=period_year.year, month=month)
-                period_code = (
-                    f"{MONTH_NAMES.get(month)[:3].upper()}{str(period_year.year)[2:]}"
-                )
-                period_name = f"{MONTH_NAMES.get(month)} {period_year.year}"
-                start_date = date(period_year.year, month, first_day)
-                end_date = date(period_year.year, month, last_day)
-                no_of_days = days_in_month
-                total_working_days = count_working_days(
-                    start_date=start_date, end_date=end_date
-                )
-                total_working_hours = total_working_days * 8
-                total_hours_per_day = 8
-                data = {
-                    "period_year_id": period_year.id,
-                    "month": month,
-                    "month_calender": calender,
-                    "year": period_year.year,
-                    "company_id": period_year.company_id,
-                    "user_id": current_user.id,
-                    "period_code": period_code,
-                    "period_name": period_name,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "no_of_days": no_of_days,
-                    "total_working_days": total_working_days,
-                    "total_working_hours": total_working_hours,
-                    "total_hours_per_day": total_hours_per_day,
-                }
-                period_data = PeriodCreate(**data)
-                period = await PeriodService.create_period(
-                    data=period_data, session=session
-                )
+            month_calender = generate_calender(period_year.year)
+            for month, calender in month_calender.items():
+                if calender:
+                    first_day = calender[0][0]
+                    last_week = calender[-1]
+                    last_day = last_week[-1] if last_week[-1] != 0 else last_week[-2]
+                    days_in_month = get_days_in_month(
+                        year=period_year.year, month=month
+                    )
+                    period_code = f"{MONTH_NAMES.get(month)[:3].upper()}{str(period_year.year)[2:]}"
+                    period_name = f"{MONTH_NAMES.get(month)} {period_year.year}"
+                    start_date = date(period_year.year, month, first_day)
+                    end_date = date(period_year.year, month, last_day)
+                    no_of_days = days_in_month
+                    total_working_days = count_working_days(
+                        start_date=start_date, end_date=end_date
+                    )
+                    total_working_hours = total_working_days * 8
+                    total_hours_per_day = 8
+                    data = {
+                        "period_year_id": period_year.id,
+                        "month": month,
+                        "month_calender": calender,
+                        "year": period_year.year,
+                        "company_id": period_year.company_id,
+                        "user_id": current_user.id,
+                        "period_code": period_code,
+                        "period_name": period_name,
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "no_of_days": no_of_days,
+                        "total_working_days": total_working_days,
+                        "total_working_hours": total_working_hours,
+                        "total_hours_per_day": total_hours_per_day,
+                    }
+                    period_data = PeriodCreate(**data)
+                    period = await PeriodService.create_period(
+                        data=period_data, session=session
+                    )
+            return period_year
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-        return period_year
 
     @staticmethod
     async def get_period(id: int, session: AsyncSession):

@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from models.company import Company
 from models.employee import Employee
 from models.user import User
 from schemas.employee import EmployeeCreate, EmployeeUpdate
@@ -14,15 +15,28 @@ class EmployeeService:
     async def create_employee(
         data: EmployeeCreate, session: AsyncSession, current_user: User
     ):
-        fullname = Employee.get_fullname(data)
-        extra_fields = {"fullname": fullname, "user_id": current_user.id}
-        employee = Employee.model_validate(data, update=extra_fields)
+        try:
+            fullname = Employee.get_fullname(data)
+            extra_fields = {"fullname": fullname, "user_id": current_user.id}
+            if data.company_id:
+                query = select(Company).where(Company.id == data.company_id)
+                results = await session.exec(query)
+                company = results.unique().one_or_none()
+                if not company:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Company not found",
+                    )
+                extra_fields["company_name"] = company.name
+            employee = Employee.model_validate(data, update=extra_fields)
 
-        session.add(employee)
-        await session.commit()
-        await session.refresh(employee)
+            session.add(employee)
+            await session.commit()
+            await session.refresh(employee)
 
-        return employee
+            return employee
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def get_employee(id: UUID, session: AsyncSession):

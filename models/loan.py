@@ -25,7 +25,8 @@ class Loan(SQLModel, table=True):
     )
     name: str = Field(sa_column=Column(String(100), nullable=False))
 
-    interest_term: str = Field(
+    interest_term: InterestTerm | None = Field(
+        default=None,
         sa_column=Column(
             Enum(
                 InterestTerm,
@@ -34,10 +35,11 @@ class Loan(SQLModel, table=True):
                 values_callable=lambda x: [e.value for e in x],
             ),
             nullable=True,
-            default=InterestTerm.PER_ANNUM,
-        )
+            default=None,
+        ),
     )
-    calculation_type: str = Field(
+    calculation_type: InterestCalculationType | None = Field(
+        default=None,
         sa_column=Column(
             Enum(
                 InterestCalculationType,
@@ -46,18 +48,18 @@ class Loan(SQLModel, table=True):
                 values_callable=lambda x: [e.value for e in x],
             ),
             nullable=True,
-            default=InterestCalculationType.STRAIGHT_LINE,
-        )
+            default=None,
+        ),
     )
 
-    min_amount: Decimal | None = Field(
-        sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
+    min_amount: Decimal = Field(
+        default=None, sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
-    max_amount: Decimal | None = Field(
-        sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
+    max_amount: Decimal = Field(
+        default=None, sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
-    interest_rate: Decimal | None = Field(
-        sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
+    interest_rate: Decimal = Field(
+        default=None, sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
 
     company_id: UUID | None = Field(
@@ -72,7 +74,7 @@ class Loan(SQLModel, table=True):
         foreign_key="users.id", nullable=True, default=None
     )
 
-    exclude: bool = Field(sa_column=Column(Boolean, default=False))
+    exclude: bool = Field(default=False, sa_column=Column(Boolean, default=False))
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(
         default_factory=datetime.now, sa_column_kwargs={"onupdate": datetime.now}
@@ -93,14 +95,14 @@ class LoanEntries(SQLModel, table=True):
 
     employee_id: UUID = Field(foreign_key="employees.id", nullable=True, default=None)
 
-    employee_code: str = Field(
-        sa_column=Column(String(20), nullable=True, default=None)
+    employee_code: str | None = Field(
+        default=None, sa_column=Column(String(20), nullable=True, default=None)
     )
     employee_fullname: str | None = Field(
-        sa_column=Column(String(255), nullable=True, default=None)
+        default=None, sa_column=Column(String(255), nullable=True, default=None)
     )
     national_id: str | None = Field(
-        sa_column=Column(String(20), nullable=True, default=None)
+        default=None, sa_column=Column(String(20), nullable=True, default=None)
     )
 
     user_id: UUID | None = Field(foreign_key="users.id", nullable=True, default=None)
@@ -110,6 +112,7 @@ class LoanEntries(SQLModel, table=True):
     )
 
     calculation_type: InterestCalculationType | None = Field(
+        default=None,
         sa_column=Column(
             Enum(
                 InterestCalculationType,
@@ -122,6 +125,7 @@ class LoanEntries(SQLModel, table=True):
         )
     )
     interest_term: InterestTerm | None = Field(
+        default=None,
         sa_column=Column(
             Enum(
                 InterestTerm,
@@ -135,22 +139,22 @@ class LoanEntries(SQLModel, table=True):
     )
 
     periodic_principal: Decimal | None = Field(
-        sa_column=Column(DECIMAL(7, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(7, 2), nullable=True, default=None)
     )
     monthly_repayment: Decimal | None = Field(
-        sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
     interest_rate: Decimal | None = Field(
-        sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
     remaining_balance: Decimal | None = Field(
-        sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
     total_amount_paid: Decimal | None = Field(
-        sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
     duration: Decimal | None = Field(
-        sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
+        default=None, sa_column=Column(DECIMAL(5, 2), nullable=True, default=None)
     )
 
     deduction_start_period_id: UUID = Field(foreign_key="periods.id", nullable=False)
@@ -164,9 +168,9 @@ class LoanEntries(SQLModel, table=True):
 
     deduction_end_date: date | None = Field(sa_column=Column(Date, nullable=True))
 
-    closed: bool = Field(sa_column=Column(Boolean, default=False))
-    status: bool = Field(sa_column=(Column(Boolean, default=True)))
-    exclude: bool = Field(sa_column=Column(Boolean, default=False))
+    closed: bool = Field(default=False, sa_column=Column(Boolean, default=False))
+    status: bool = Field(default=True, sa_column=(Column(Boolean, default=True)))
+    exclude: bool = Field(default=False, sa_column=Column(Boolean, default=False))
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(

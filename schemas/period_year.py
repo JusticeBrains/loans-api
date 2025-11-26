@@ -7,7 +7,6 @@ from sqlmodel import SQLModel
 class PeriodYearBase(SQLModel):
     year: int
     company_id: UUID
-    user_id: UUID | None = None
 
 
 class PeriodYearCreate(PeriodYearBase):
@@ -15,11 +14,13 @@ class PeriodYearCreate(PeriodYearBase):
 
 
 class PeriodYearUpdate(PeriodYearBase):
+    user_id: UUID | None = None
     updated_at: datetime = datetime.now()
 
 
 class PeriodYearRead(PeriodYearBase):
     id: int
+    user_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 

@@ -12,13 +12,12 @@ from utils.text_options import InterestCalculationType, InterestTerm
 class LoanBase(SQLModel):
     code: str
     name: str
-    interest_term: InterestTerm
-    calculation_type: InterestCalculationType
-    min_amount: Decimal | None = None
-    max_amount: Decimal | None = None
-    interest_rate: Decimal | None = None
+    interest_term: InterestTerm | None = None
+    calculation_type: InterestCalculationType | None = None
+    min_amount: Decimal | None = Decimal(0)
+    max_amount: Decimal | None = Decimal(0)
+    interest_rate: Decimal | None = Decimal(0)
     company_id: UUID
-    user_id: UUID
 
 
 class LoanCreate(LoanBase):
@@ -27,7 +26,8 @@ class LoanCreate(LoanBase):
 
 class LoanRead(LoanBase):
     id: UUID
-    exclude: bool = False
+    user_id: UUID
+    exclude: bool
     created_at: datetime
     updated_at: datetime
 
@@ -55,7 +55,7 @@ class LoanEntriesBase(SQLModel):
     employee_code: str | None = None
     employee_fullname: str | None = None
     national_id: str | None = None
-    user_id: UUID
+    user_id: UUID | None = None
     calculation_type: InterestCalculationType | None = None
     interest_term: InterestTerm | None = None
     periodic_principal: Decimal | None = None
