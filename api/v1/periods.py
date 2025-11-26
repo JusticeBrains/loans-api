@@ -20,7 +20,6 @@ async def get_periods(
     period_year_id: int | None = None,
     period_code: str | None = None,
     period_name: str | None = None,
-    company_id: UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
@@ -29,7 +28,6 @@ async def get_periods(
         period_year_id=period_year_id,
         period_code=period_code,
         period_name=period_name,
-        company_id=company_id,
         limit=limit,
         offset=offset,
     )
