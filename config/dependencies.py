@@ -1,8 +1,10 @@
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 from config.db import get_session
+from models.user import RevokedToken
 from services.user import UserService, UserActivity
 
 security = HTTPBearer()
@@ -16,6 +18,16 @@ async def get_current_user(
     request: Request = None,
 ):
     token = credentials.credentials
+
+    revoked_token = await session.exec(
+        select(RevokedToken).where(RevokedToken.token == token)
+    )
+    revoked_token = revoked_token.one_or_none()
+
+    if revoked_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
     if await user_activity.is_rate_limited(token=token):
         raise HTTPException(

@@ -62,3 +62,11 @@ class User(SQLModel, table=True):
 
     def __str__(self):
         return self.__repr__()
+
+
+class RevokedToken(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    token: str = Field(
+        sa_column=Column(String(255), nullable=False, index=True, unique=True)
+    )
+    revoked_at: datetime = Field(default_factory=datetime.now)
