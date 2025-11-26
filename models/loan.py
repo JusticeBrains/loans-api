@@ -27,7 +27,12 @@ class Loan(SQLModel, table=True):
 
     interest_term: str = Field(
         sa_column=Column(
-            Enum(InterestTerm, name="interest_term_enum", native_enum=True),
+            Enum(
+                InterestTerm,
+                name="interest_term_enum",
+                native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
+            ),
             nullable=True,
             default=InterestTerm.PER_ANNUM,
         )
@@ -38,6 +43,7 @@ class Loan(SQLModel, table=True):
                 InterestCalculationType,
                 name="interest_calculation_type_enum",
                 native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
             ),
             nullable=True,
             default=InterestCalculationType.STRAIGHT_LINE,
@@ -109,6 +115,7 @@ class LoanEntries(SQLModel, table=True):
                 InterestCalculationType,
                 name="interest_calculation_type_enum",
                 native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
             ),
             nullable=True,
             default=None,
@@ -116,7 +123,12 @@ class LoanEntries(SQLModel, table=True):
     )
     interest_term: InterestTerm | None = Field(
         sa_column=Column(
-            Enum(InterestTerm, name="interest_term_enum", native_enum=True),
+            Enum(
+                InterestTerm,
+                name="interest_term_enum",
+                native_enum=True,
+                values_callable=lambda x: [e.value for e in x],
+            ),
             nullable=True,
             default=None,
         )
