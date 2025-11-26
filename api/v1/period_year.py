@@ -27,14 +27,12 @@ async def get_period_years(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
     year: int | None = None,
-    company_id: UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
     return await PeriodYearService.get_periods(
         session=session,
         year=year,
-        company_id=company_id,
         limit=limit,
         offset=offset,
     )

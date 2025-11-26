@@ -100,22 +100,25 @@ class PeriodYearService:
         limit: int = 10,
         offset: int = 0,
     ):
-        query = (
-            select(PeriodYear)
-            .order_by(PeriodYear.year.desc())
-            .limit(limit=limit)
-            .offset(offset=offset)
-        )
+        try:
+            query = (
+                select(PeriodYear)
+                .order_by(PeriodYear.year.desc())
+                .limit(limit=limit)
+                .offset(offset=offset)
+            )
 
-        if year:
-            query = query.where(PeriodYear.year == year)
+            if year:
+                query = query.where(PeriodYear.year == year)
 
-        results = await session.exec(query)
-        periods = results.unique().all()
+            results = await session.exec(query)
+            periods = results.unique().all()
 
-        count = len(periods)
+            count = len(periods)
 
-        return ResponseModel(count=count, results=periods)
+            return ResponseModel(count=count, results=periods)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def delete_period(id: int, session: AsyncSession):
@@ -156,37 +159,43 @@ class PeriodService:
         limit: int = 10,
         offset: int = 0,
     ):
-        query = (
-            select(Period)
-            .order_by(Period.period_code.desc())
-            .limit(limit=limit)
-            .offset(offset=offset)
-        )
+        try:
+            query = (
+                select(Period)
+                .order_by(Period.period_code.desc())
+                .limit(limit=limit)
+                .offset(offset=offset)
+            )
 
-        if period_code:
-            query = query.where(Period.period_code == period_code)
-        if period_name:
-            query = query.where(Period.period_name == period_name)
-        if period_year_id:
-            query = query.where(Period.period_year_id == period_year_id)
+            if period_code:
+                query = query.where(Period.period_code == period_code)
+            if period_name:
+                query = query.where(Period.period_name == period_name)
+            if period_year_id:
+                query = query.where(Period.period_year_id == period_year_id)
 
-        results = await session.exec(query)
-        periods = results.unique().all()
+            results = await session.exec(query)
+            periods = results.unique().all()
 
-        count = len(periods)
-        periods_result = [PeriodRead.model_validate(period) for period in periods]
-        return ResponseModel(count=count, results=periods_result)
+            count = len(periods)
+            periods_result = [PeriodRead.model_validate(period) for period in periods]
+            return ResponseModel(count=count, results=periods_result)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def get_period(id: UUID, session: AsyncSession):
-        query = select(Period).where(Period.id == id)
-        result = await session.exec(query)
+        try:
+            query = select(Period).where(Period.id == id)
+            result = await session.exec(query)
 
-        period = result.unique().one_or_none()
+            period = result.unique().one_or_none()
 
-        if not period:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, details="Period not found"
-            )
+            if not period:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, details="Period not found"
+                )
 
-        return period
+            return period
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
