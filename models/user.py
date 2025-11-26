@@ -32,12 +32,15 @@ class User(SQLModel, table=True):
     )
     is_active: int = Field(sa_column=Column(Integer, nullable=False, default=1))
     is_super: int = Field(sa_column=Column(Integer, nullable=False, default=0))
+    is_verified: str = Field(default=0,sa_column=Column(String(6), nullable=True, default=0))
     is_password_changed: bool = Field(
         sa_column=Column(Boolean, nullable=False, default=False)
     )
     is_password_reset: bool = Field(
         sa_column=Column(Boolean, nullable=False, default=False)
     )
+    admin_access: bool | None = Field(default=False, sa_column=Column(Boolean, nullable=True, default=False))
+    faab_admin: bool | None = Field(default=False, sa_column=Column(Boolean, nullable=True, default=False))
     created_at: datetime = Field(default_factory=datetime.now, nullable=True)
     updated_at: datetime = Field(
         default_factory=datetime.now,

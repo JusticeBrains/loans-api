@@ -104,6 +104,12 @@ class LoanEntries(SQLModel, table=True):
     national_id: str | None = Field(
         default=None, sa_column=Column(String(20), nullable=True, default=None)
     )
+    company_id: UUID | None = Field(
+        foreign_key="companies.id", nullable=True, default=None
+    )
+    company_name: str | None = Field(
+        default=None, sa_column=Column(String(255), nullable=True, default=None)
+    )
 
     user_id: UUID | None = Field(foreign_key="users.id", nullable=True, default=None)
 
@@ -171,6 +177,7 @@ class LoanEntries(SQLModel, table=True):
     closed: bool = Field(default=False, sa_column=Column(Boolean, default=False))
     status: bool = Field(default=True, sa_column=(Column(Boolean, default=True)))
     exclude: bool = Field(default=False, sa_column=Column(Boolean, default=False))
+    is_deleted: bool = Field(default=False, sa_column=Column(Boolean, default=False))
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(

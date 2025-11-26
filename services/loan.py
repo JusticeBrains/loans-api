@@ -11,6 +11,7 @@ from models.loan import Loan, LoanEntries
 from models.user import User
 from schemas.base import ResponseModel
 from schemas.loan import LoanCreate, LoanEntriesCreate, LoanEntriesUpdate, LoanUpdate
+from services.company import CompanyService
 from services.employee import EmployeeService
 from services.payment_schedule import PaymentScheduleService
 from services.period_year import PeriodService
@@ -55,7 +56,6 @@ class LoanService:
         name: str | None = None,
         interest_term: InterestTerm | None = None,
         calculation_type: InterestCalculationType | None = None,
-        company_id: UUID | None = None,
         limit: int = 10,
         offset: int = 0,
     ):
@@ -70,8 +70,6 @@ class LoanService:
             query = query.where(Loan.interest_term == interest_term)
         if calculation_type:
             query = query.where(Loan.calculation_type == calculation_type)
-        if company_id:
-            query = query.where(Loan.company_id == company_id)
         result = await session.exec(query)
 
         loans = result.unique().all()
@@ -165,6 +163,14 @@ class LoanEntriesService:
                 data.code = loan.code
                 data.description = loan.name
                 data.loan_name = loan.name
+
+            if data.company_id:
+                company = await CompanyService.get_company(id=data.company_id, session=session)
+                if not company:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+                    )
+                data.company_name = company.name
 
             data.user_id = current_user.id
 
@@ -267,7 +273,7 @@ class LoanEntriesService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
             )
 
-        setattr(loan_entry, "exclude", True)
+        setattr(loan_entry, "is_deleted", True)
         session.add(loan_entry)
         await session.flush()
 

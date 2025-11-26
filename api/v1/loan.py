@@ -23,7 +23,6 @@ async def get_loans(
     name: str | None = None,
     interest_term: InterestTerm | None = None,
     calculation_type: InterestCalculationType | None = None,
-    company_id: UUID | None = None,
     limit: int = 10,
     offset: int = 0,
 ):
@@ -33,7 +32,6 @@ async def get_loans(
         name=name,
         interest_term=interest_term,
         calculation_type=calculation_type,
-        company_id=company_id,
         limit=limit,
         offset=offset,
     )

@@ -17,7 +17,6 @@ class LoanBase(SQLModel):
     min_amount: Decimal | None = Decimal(0)
     max_amount: Decimal | None = Decimal(0)
     interest_rate: Decimal | None = Decimal(0)
-    company_id: UUID
 
 
 class LoanCreate(LoanBase):
@@ -56,6 +55,7 @@ class LoanEntriesBase(SQLModel):
     employee_fullname: str | None = None
     national_id: str | None = None
     user_id: UUID | None = None
+    company_id: UUID | None = None
     calculation_type: InterestCalculationType | None = None
     interest_term: InterestTerm | None = None
     periodic_principal: Decimal | None = None
