@@ -1,10 +1,8 @@
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
 
 from config.settings import DATABASE_URL
-from environs import Env
 
 
 engine = create_async_engine(url=DATABASE_URL, echo=True, future=True)
@@ -16,12 +14,3 @@ async def get_session():
     async with async_session() as session:
         yield session
 
-
-# async def create_db_and_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(SQLModel.metadata.create_all)
-
-
-# async def drop_db_and_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(SQLModel.metadata.drop_all)
