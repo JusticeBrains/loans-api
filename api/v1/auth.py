@@ -19,7 +19,7 @@ async def login(data: UserLogin, session: AsyncSession = Depends(get_session)):
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh(refresh_token: RefreshToken, session: AsyncSession = Depends(get_session)):
+async def refresh(refresh_token: str, session: AsyncSession = Depends(get_session)):
     """Refresh access token using refresh token"""
     return await UserService.refresh_access_token(refresh_token, session)
 

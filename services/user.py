@@ -131,8 +131,8 @@ class UserService:
         return Token(access_token=access_token, refresh_token=refresh_token)
 
     @staticmethod
-    async def refresh_access_token(refresh_token: RefreshToken, session: AsyncSession) -> Token:
-        user_id = verify_token(refresh_token.refresh_token)
+    async def refresh_access_token(refresh_token: str, session: AsyncSession) -> Token:
+        user_id = verify_token(refresh_token)
 
         if not user_id:
             raise HTTPException(
@@ -152,7 +152,7 @@ class UserService:
 
         return Token(
             access_token=access_token,
-            refresh_token=refresh_token.refresh_token,
+            refresh_token=refresh_token,
         )
 
     @staticmethod
