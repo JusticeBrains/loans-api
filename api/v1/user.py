@@ -35,9 +35,14 @@ async def create_user(
 
 @router.get("/", response_model=ResponseModel)
 async def get_users(
-    limit: int = 10, offset: int = 0, session: AsyncSession = Depends(get_session)
+    username: str | None = None,
+    limit: int = 10,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
 ):
-    return await UserService.get_users(limit=limit, offset=offset, session=session)
+    return await UserService.get_users(
+        username=username, limit=limit, offset=offset, session=session
+    )
 
 
 @router.patch("/{id}", response_model=UserRead, status_code=status.HTTP_200_OK)

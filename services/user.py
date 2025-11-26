@@ -53,13 +53,17 @@ class UserService:
         return user
 
     @staticmethod
-    async def get_users(session: AsyncSession, limit: int = 10, offset: int = 0):
+    async def get_users(
+        session: AsyncSession, username: str = None, limit: int = 10, offset: int = 0
+    ):
         query = (
             select(User)
             .order_by(User.username)
             .limit(limit=limit)
             .offset(offset=offset)
         )
+        if username:
+            query = query.where(User.username == username)
         result = await session.exec(query)
         users = result.unique().all()
         users_read = [UserRead.model_validate(user) for user in users]
