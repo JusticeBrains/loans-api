@@ -8,7 +8,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from config.auth import create_access_token, create_refresh_token, verify_token
 from models.user import User
-from schemas.user import UserCreate, UserLogin, UserRead, UserUpdate, Token
+from schemas.user import RefreshToken, UserCreate, UserLogin, UserRead, UserUpdate, Token
 from schemas.base import ResponseModel
 from utils.crypto import hash_password, verify_password
 
@@ -131,8 +131,8 @@ class UserService:
         return Token(access_token=access_token, refresh_token=refresh_token)
 
     @staticmethod
-    async def refresh_access_token(refresh_token: str, session: AsyncSession) -> Token:
-        user_id = verify_token(refresh_token)
+    async def refresh_access_token(refresh_token: RefreshToken, session: AsyncSession) -> Token:
+        user_id = verify_token(refresh_token.refresh_token)
 
         if not user_id:
             raise HTTPException(
@@ -152,7 +152,7 @@ class UserService:
 
         return Token(
             access_token=access_token,
-            refresh_token=refresh_token,
+            refresh_token=refresh_token.refresh_token,
         )
 
     @staticmethod
