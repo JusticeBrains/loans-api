@@ -21,6 +21,7 @@ class UserService:
         hashed_password = hash_password(data.password)
         fullname = User.get_fullname(data)
         username = User.get_username(data)
+        pin = User.generate_pin(data)
 
         payload = data.model_dump(exclude_unset=True)
         payload.pop("password", None)
@@ -30,6 +31,7 @@ class UserService:
             username=username,
             fullname=fullname,
             password=hashed_password,
+            pin=pin,
         )
 
         session.add(user)

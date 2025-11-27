@@ -32,7 +32,7 @@ class User(SQLModel, table=True):
     )
     is_active: int = Field(sa_column=Column(Integer, nullable=False, default=1))
     is_super: int = Field(sa_column=Column(Integer, nullable=False, default=0))
-    is_verified: str = Field(default=0,sa_column=Column(String(6), nullable=True, default=0))
+    is_verified: str = Field(default=0,sa_column=Column(String(50), nullable=True, default=0))
     is_password_changed: bool = Field(
         sa_column=Column(Boolean, nullable=False, default=False)
     )
@@ -59,6 +59,10 @@ class User(SQLModel, table=True):
     def get_username(data):
         ext = str(random())
         return f"{data.firstname[:4].lower()}{data.lastname[1:3].lower()}{ext[3:5]}"
+    
+    @staticmethod
+    def generate_pin(data):
+        return str(random()).split('.')[1][:4]
 
     def __repr__(self):
         return f"{self.username}"
