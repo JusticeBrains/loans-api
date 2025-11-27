@@ -57,6 +57,7 @@ class PaymentService:
             payment.employee_fullname = loan_entry.employee_fullname
             payment.loan_amount = loan_entry.amount
             payment.loan_entry_description = loan_entry.description
+            payment.loan_entry_name = loan_entry.loan_name
             payment.loan_entry_code = loan_entry.code
             payment.user_name = current_user.username
             payment.company_name = company.name if company else ""
