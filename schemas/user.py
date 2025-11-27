@@ -28,7 +28,7 @@ class UserRead(UserBase):
     username: str
     is_password_changed: bool 
     is_password_reset: bool
-    is_active: bool | None = None
+    is_active: bool
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -41,7 +41,7 @@ class UserUpdate(UserCreate):
     company_id: uuid.UUID | None = None
     is_password_changed: bool | None = None
     is_password_reset: bool | None = None
-    is_active: int
+    is_active: int | None = None
 
 
 class UserLogin(SQLModel):
