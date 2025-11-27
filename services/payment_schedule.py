@@ -43,7 +43,7 @@ class PaymentScheduleService:
     ):
         query = (
             select(PaymentSchedule)
-            .order_by(PaymentSchedule.month.desc())
+            .order_by(PaymentSchedule.month.asc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
