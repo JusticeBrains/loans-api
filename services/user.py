@@ -82,7 +82,7 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="No user found"
             )
 
-        for key, value in data.model_dump().items():
+        for key, value in data.model_dump(exclude_unset=True).items():
             if value:
                 setattr(user, key, value)
 
