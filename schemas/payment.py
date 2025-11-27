@@ -24,7 +24,7 @@ class PaymentBase(SQLModel):
     difference: Decimal | None = None
     processed: bool = False
 
-    company_id: UUID
+    company_id: UUID | None = None
     company_name: str | None = None
     user_id: UUID | None = None
     user_name: str | None = None

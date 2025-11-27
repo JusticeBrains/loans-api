@@ -31,6 +31,7 @@ class PaymentService:
                     status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
                 )
 
+            company = None
             if data.company_id:
                 company = await CompanyService.get_company(
                     id=data.company_id, session=session
@@ -59,6 +60,7 @@ class PaymentService:
             payment.loan_entry_code = loan_entry.code
             payment.user_name = current_user.username
             payment.company_name = company.name if company else ""
+            payment.company_id = company.id if company else None
 
             session.add(payment)
             await session.flush()

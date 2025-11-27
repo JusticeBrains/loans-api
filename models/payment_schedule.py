@@ -133,7 +133,7 @@ class Payment(SQLModel, table=True):
         sa_column=Column(DECIMAL(10, 2), nullable=True, default=None)
     )
 
-    company_id: UUID = Field(foreign_key="companies.id", nullable=True, default=None)
+    company_id: UUID | None = Field(foreign_key="companies.id", nullable=True, default=None)
 
     company_name: str | None = Field(
         sa_column=Column(String(100), nullable=True, default=None)
