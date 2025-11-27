@@ -7,7 +7,6 @@ from fastapi import HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 
-from models.loan import LoanEntries
 from models.payment_schedule import Payment, PaymentSchedule
 from schemas.loan import LoanEntriesCreate
 from schemas.payment_schedule import PaymentScheduleCreate
@@ -62,11 +61,13 @@ def get_days_in_month(year: int, month: int):
 
 async def defualt_schedule_generation(
     start_date: date,
-    loan_id: LoanEntries,
+    loan_id: UUID,
     data: LoanEntriesCreate,
     session: AsyncSession,
 ):
     try:
+        from models.loan import LoanEntries
+        loan_entry = await session.get(LoanEntries, loan_id)
         if isinstance(start_date, date):
             if data.amount and data.monthly_repayment:
                 duration = data.amount / data.monthly_repayment
@@ -83,17 +84,17 @@ async def defualt_schedule_generation(
                     amount_left = round(amount_left - monthly_amount, 4)
                     await PaymentScheduleService.create_schedule(
                         data=PaymentScheduleCreate(
-                            loan_entry_id=loan_id.id,
+                            loan_entry_id=loan_id,
                             month=month,
-                            employee_id=loan_id.employee_id,
-                            employee_code=loan_id.employee_code,
-                            employee_fullname=loan_id.employee_fullname,
+                            employee_id=loan_entry.employee_id,
+                            employee_code=loan_entry.employee_code,
+                            employee_fullname=loan_entry.employee_fullname,
                             monthly_payment=monthly_amount,
                             balance_bf=amount_left + monthly_amount,
                             balance=amount_left,
                             # company_id=loan_id.company_id,
                             # company_name=loan_id.company_name,
-                            user_id=loan_id.user_id,
+                            user_id=loan_entry.user_id,
                             # user_name=loan_id.user_name,
                         ),
                         session=session,

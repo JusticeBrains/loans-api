@@ -8,13 +8,13 @@ from sqlmodel import select
 from dateutil.relativedelta import relativedelta
 
 from models.loan import Loan, LoanEntries
+from models.period_year import Period
 from models.user import User
 from schemas.base import ResponseModel
 from schemas.loan import LoanCreate, LoanEntriesCreate, LoanEntriesUpdate, LoanUpdate
 from services.company import CompanyService
 from services.employee import EmployeeService
 from services.payment_schedule import PaymentScheduleService
-from services.period_year import PeriodService
 from utils.helper import defualt_schedule_generation, delete_payment_by_loan_entry_id
 from utils.text_options import InterestCalculationType, InterestTerm
 
@@ -142,10 +142,13 @@ class LoanEntriesService:
                 data.loan_name = loan.name
 
             if data.company_id:
-                company = await CompanyService.get_company(id=data.company_id, session=session)
+                company = await CompanyService.get_company(
+                    id=data.company_id, session=session
+                )
                 if not company:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Company not found",
                     )
                 data.company_name = company.name
 
@@ -156,35 +159,39 @@ class LoanEntriesService:
 
             await session.flush()
 
+            if data.deduction_start_period_id:
+                deduction_period = await session.get(
+                    Period, data.deduction_start_period_id
+                )
+                if not deduction_period:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Period not found",
+                    )
+                loan_entry.deduction_start_period_name = deduction_period.period_name
+                loan_entry.deduction_start_period_code = deduction_period.period_code
+
             duration = await defualt_schedule_generation(
                 start_date=deduction_period.start_date,
-                loan_id=loan_entry,
+                loan_id=loan_entry.id,
                 data=data,
                 session=session,
             )
+
+            loan_entry.duration = duration
+
             if duration:
-                if data.deduction_start_period_id:
-                    deduction_period = await PeriodService.get_period(
-                        id=data.deduction_start_period_id, session=session
+                if isinstance(deduction_period.start_date, date):
+                    duration_in_months = math.ceil(data.duration)
+                    data.deduction_end_date = (
+                        deduction_period.start_date
+                        + relativedelta(months=duration_in_months - 1)
                     )
-                    if not deduction_period:
-                        raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Period not found",
-                        )
-                    data.deduction_start_period_name = deduction_period.period_name
-                    data.deduction_start_period_code = deduction_period.period_code
-                    if isinstance(deduction_period.start_date, date):
-                        duration_in_months = math.ceil(data.duration)
-                        data.deduction_end_date = (
-                            deduction_period.start_date
-                            + relativedelta(months=duration_in_months - 1)
-                        )
-                    else:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Deduction start period is required",
-                        )
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Deduction start period is required",
+                    )
 
             await session.commit()
             await session.refresh(loan_entry)

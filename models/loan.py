@@ -128,7 +128,7 @@ class LoanEntries(SQLModel, table=True):
             ),
             nullable=True,
             default=None,
-        )
+        ),
     )
     interest_term: InterestTerm | None = Field(
         default=None,
@@ -141,7 +141,7 @@ class LoanEntries(SQLModel, table=True):
             ),
             nullable=True,
             default=None,
-        )
+        ),
     )
 
     periodic_principal: Decimal | None = Field(
@@ -165,11 +165,11 @@ class LoanEntries(SQLModel, table=True):
 
     deduction_start_period_id: UUID = Field(foreign_key="periods.id", nullable=False)
 
-    deduction_start_period_name: str = Field(
-        sa_column=Column(String(20), nullable=True)
+    deduction_start_period_name: str | None = Field(
+        default=None, sa_column=Column(String(20), nullable=True, default=None)
     )
-    deduction_start_period_code: str = Field(
-        sa_column=Column(String(20), nullable=True)
+    deduction_start_period_code: str | None = Field(
+        default=None, sa_column=Column(String(20), nullable=True, default=None)
     )
 
     deduction_end_date: date | None = Field(sa_column=Column(Date, nullable=True))

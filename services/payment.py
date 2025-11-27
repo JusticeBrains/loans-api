@@ -31,11 +31,12 @@ class PaymentService:
                     status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
                 )
 
-            company = await CompanyService.get_company(
-                id=data.company_id, session=session
-            )
-            if not company:
-                raise HTTPException(
+            if data.company_id:
+                company = await CompanyService.get_company(
+                    id=data.company_id, session=session
+                )
+                if not company:
+                    raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
                 )
 
@@ -57,7 +58,7 @@ class PaymentService:
             payment.loan_entry_description = loan_entry.description
             payment.loan_entry_code = loan_entry.code
             payment.user_name = current_user.username
-            payment.company_name = company.name
+            payment.company_name = company.name if company else ""
 
             session.add(payment)
             await session.flush()
