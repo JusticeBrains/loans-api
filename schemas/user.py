@@ -16,6 +16,7 @@ class UserBase(SQLModel):
     is_super: int = 0
     admin_access: bool | None = False
     faab_admin: bool | None = False
+    is_verified: str | None = None
 
 
 class UserCreate(UserBase):
@@ -28,13 +29,11 @@ class UserRead(UserBase):
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
-    is_verified: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
 
 class UserUpdate(UserCreate):
-    id: uuid.UUID
     email: str | None = None
     firstname: str | None = None
     lastname: str | None = None
