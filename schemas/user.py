@@ -26,8 +26,8 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: uuid.UUID
     username: str
-    is_password_changed: bool | None = None
-    is_password_reset: bool | None = None
+    is_password_changed: bool 
+    is_password_reset: bool
     is_active: bool | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
@@ -39,9 +39,9 @@ class UserUpdate(UserCreate):
     lastname: str | None = None
     password: str | None = None
     company_id: uuid.UUID | None = None
-    is_password_changed: bool
-    is_password_reset: bool
-    is_active: int = 1
+    is_password_changed: bool | None = None
+    is_password_reset: bool | None = None
+    is_active: int
 
 
 class UserLogin(SQLModel):
