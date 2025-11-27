@@ -14,8 +14,8 @@ class UserBase(SQLModel):
     pin: str | None = None
     company_id: uuid.UUID | None = None
     is_super: int = 0
-    admin_access: bool = False
-    faab_admin: bool = False
+    admin_access: bool | None = False
+    faab_admin: bool | None = False
 
 
 class UserCreate(UserBase):
