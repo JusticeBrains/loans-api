@@ -28,6 +28,7 @@ class UserRead(UserBase):
     is_password_changed: bool
     is_password_reset: bool
     is_active: bool
+    is_verified: str
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
