@@ -85,7 +85,7 @@ class EmployeeService:
     ):
         query = (
             select(Employee)
-            .order_by(Employee.code)
+            .order_by(Employee.code.asc())
             .limit(limit=limit)
             .offset(offset=offset)
         )
