@@ -117,29 +117,6 @@ class LoanEntriesService:
     ):
         try:
             deduction_period: date | None = None
-            if not data.calculation_type:
-                if data.deduction_start_period_id:
-                    deduction_period = await PeriodService.get_period(
-                        id=data.deduction_start_period_id, session=session
-                    )
-                    if not deduction_period:
-                        raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Period not found",
-                        )
-                    data.deduction_start_period_name = deduction_period.period_name
-                    data.deduction_start_period_code = deduction_period.period_code
-                    if isinstance(deduction_period.start_date, date):
-                        duration_in_months = math.ceil(data.duration)
-                        data.deduction_end_date = (
-                            deduction_period.start_date
-                            + relativedelta(months=duration_in_months - 1)
-                        )
-                    else:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Deduction start period is required",
-                        )
 
             if data.employee_id:
                 employee = await EmployeeService.get_employee(
@@ -179,12 +156,35 @@ class LoanEntriesService:
 
             await session.flush()
 
-            await defualt_schedule_generation(
+            duration = await defualt_schedule_generation(
                 start_date=deduction_period.start_date,
                 loan_id=loan_entry,
                 data=data,
                 session=session,
             )
+            if duration:
+                if data.deduction_start_period_id:
+                    deduction_period = await PeriodService.get_period(
+                        id=data.deduction_start_period_id, session=session
+                    )
+                    if not deduction_period:
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Period not found",
+                        )
+                    data.deduction_start_period_name = deduction_period.period_name
+                    data.deduction_start_period_code = deduction_period.period_code
+                    if isinstance(deduction_period.start_date, date):
+                        duration_in_months = math.ceil(data.duration)
+                        data.deduction_end_date = (
+                            deduction_period.start_date
+                            + relativedelta(months=duration_in_months - 1)
+                        )
+                    else:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Deduction start period is required",
+                        )
 
             await session.commit()
             await session.refresh(loan_entry)
