@@ -11,13 +11,19 @@ from schemas.payment_schedule import PaymentScheduleCreate, PaymentScheduleUpdat
 class PaymentScheduleService:
     @staticmethod
     async def create_schedule(data: PaymentScheduleCreate, session: AsyncSession):
-        schedule = PaymentSchedule.model_validate(data)
+        try:
+            schedule = PaymentSchedule.model_validate(data)
 
-        session.add(schedule)
-        await session.commit()
-        await session.refresh(schedule)
+            session.add(schedule)
+            await session.commit()
+            await session.refresh(schedule)
 
-        return schedule
+            return schedule
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
+            )
 
     @staticmethod
     async def get_schedule(id: UUID, session: AsyncSession):
@@ -59,58 +65,76 @@ class PaymentScheduleService:
 
     @staticmethod
     async def delete_schedule(id: UUID, session: AsyncSession):
-        schedule = await PaymentScheduleService.get_schedule(id=id, session=session)
+        try:
+            schedule = await PaymentScheduleService.get_schedule(id=id, session=session)
 
-        if not schedule:
+            if not schedule:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Payment schedule not found",
+                )
+
+            schedule.is_deleted = True
+
+            session.add(schedule)
+            await session.commit()
+            await session.refresh(schedule)
+
+            return {}
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Payment schedule not found",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
             )
-
-        schedule.is_deleted = True
-
-        session.add(schedule)
-        await session.commit()
-        await session.refresh(schedule)
-
-        return {}
 
     @staticmethod
     async def update_schedule(
         id: UUID, data: PaymentScheduleUpdate, session: AsyncSession
     ):
-        schedule = await PaymentScheduleService.get_schedule(id=id, session=session)
+        try:
+            schedule = await PaymentScheduleService.get_schedule(id=id, session=session)
 
-        if not schedule:
+            if not schedule:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Payment schedule not found",
+                )
+
+            schedule.sqlmodel_update(data.model_dump(exclude_unset=True))
+            session.add(schedule)
+
+            await session.flush()
+            # await session.commit()
+            # await session.refresh(schedule)
+
+            return schedule
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Payment schedule not found",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
             )
-
-        schedule.sqlmodel_update(data.model_dump(exclude_unset=True))
-        session.add(schedule)
-
-        await session.flush()
-        # await session.commit()
-        # await session.refresh(schedule)
-
-        return schedule
 
     @staticmethod
     async def delete_schedule_based_on_loan_entry_id(
         loan_entry_id: UUID, session: AsyncSession
     ):
-        query = select(PaymentSchedule).where(
-            PaymentSchedule.loan_entry_id == loan_entry_id
-        )
-        result = await session.exec(query)
+        try:
+            query = select(PaymentSchedule).where(
+                PaymentSchedule.loan_entry_id == loan_entry_id
+            )
+            result = await session.exec(query)
 
-        schedules = result.unique().all()
+            schedules = result.unique().all()
 
-        for schedule in schedules:
-            schedule.is_deleted = True
-            session.add(schedule)
-        await session.commit()
-        await session.refresh(schedule)
+            for schedule in schedules:
+                schedule.is_deleted = True
+                session.add(schedule)
+            await session.commit()
+            await session.refresh(schedule)
 
-        return {}
+            return {}
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
+            )

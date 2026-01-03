@@ -78,7 +78,6 @@ class PeriodYearService:
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
     @staticmethod
     async def get_period(id: int, session: AsyncSession):
         query = select(PeriodYear).where(PeriodYear.id == id)
@@ -122,33 +121,46 @@ class PeriodYearService:
 
     @staticmethod
     async def delete_period(id: int, session: AsyncSession):
-        period_year = await PeriodYearService.get_period(id=id, session=session)
+        try:
+            period_year = await PeriodYearService.get_period(id=id, session=session)
 
-        if not period_year:
+            if not period_year:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    details="Period year not found",
+                )
+
+            await session.delete(period_year)
+            await session.commit()
+
+            return {}
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, details="Period year not found"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
             )
-
-        await session.delete(period_year)
-        await session.commit()
-
-        return {}
 
 
 class PeriodService:
     @staticmethod
     async def create_period(data: PeriodCreate, session: AsyncSession):
-        period_year = await PeriodYearService.get_period(
-            id=data.period_year_id, session=session
-        )
-        extra_fields = {"period_year": period_year}
-        period = Period.model_validate(data, update=extra_fields)
+        try:
+            period_year = await PeriodYearService.get_period(
+                id=data.period_year_id, session=session
+            )
+            extra_fields = {"period_year": period_year}
+            period = Period.model_validate(data, update=extra_fields)
 
-        session.add(period)
-        await session.commit()
-        await session.refresh(period)
+            session.add(period)
+            await session.commit()
+            await session.refresh(period)
 
-        return period
+            return period
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
+            )
 
     @staticmethod
     async def get_periods(

@@ -38,8 +38,9 @@ class PaymentService:
                 )
                 if not company:
                     raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
-                )
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail="Company not found",
+                    )
 
             schedules, min_month = await get_sorted_schedules_and_min_month(
                 loan_entry_id=loan_entry.id, session=session
@@ -200,36 +201,48 @@ class PaymentService:
 
     @staticmethod
     async def delete_payment(id: UUID, session: AsyncSession):
-        payment = await PaymentService.get_payment(id=id, session=session)
+        try:
+            payment = await PaymentService.get_payment(id=id, session=session)
 
-        if not payment:
+            if not payment:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Payment not found",
+                )
+
+            payment.is_deleted = True
+
+            session.add(payment)
+            await session.commit()
+            await session.refresh(payment)
+
+            return {}
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Payment not found",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
             )
-
-        payment.is_deleted = True
-
-        session.add(payment)
-        await session.commit()
-        await session.refresh(payment)
-
-        return {}
 
     @staticmethod
     async def delete_payment_by_loan_entry_id(
         loan_entry_id: UUID, session: AsyncSession
     ):
-        query = select(Payment).where(Payment.loan_entry_id == loan_entry_id)
-        result = await session.exec(query)
+        try:
+            query = select(Payment).where(Payment.loan_entry_id == loan_entry_id)
+            result = await session.exec(query)
 
-        payments = result.unique().all()
+            payments = result.unique().all()
 
-        for payment in payments:
-            payment.is_deleted = True
-            session.add(payment)
+            for payment in payments:
+                payment.is_deleted = True
+                session.add(payment)
 
-        session.commit()
-        session.refresh(payments)
+            session.commit()
+            session.refresh(payments)
 
-        return {}
+            return {}
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
+            )
