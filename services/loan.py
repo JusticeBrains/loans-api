@@ -33,21 +33,27 @@ class LoanService:
 
             return loan
         except Exception as e:
+            await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
     async def get_loan(id: UUID, session: AsyncSession):
-        query = select(Loan).where(Loan.id == id)
-        result = await session.exec(query)
+        try:
+            query = select(Loan).where(Loan.id == id)
+            result = await session.exec(query)
 
-        loan = result.unique().one_or_none()
+            loan = result.unique().one_or_none()
 
-        if not loan:
+            if not loan:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                )
+
+            return loan
+        except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}"
             )
-
-        return loan
 
     @staticmethod
     async def get_loans(
@@ -60,7 +66,10 @@ class LoanService:
         offset: int = 0,
     ):
         query = (
-            select(Loan).order_by(Loan.name).limit(limit=limit).offset(offset=offset)
+            select(Loan)
+            .order_by(Loan.code.asc())
+            .limit(limit=limit)
+            .offset(offset=offset)
         )
         if code:
             query = query.where(Loan.code == code)
@@ -79,35 +88,47 @@ class LoanService:
 
     @staticmethod
     async def delete_loan(id: UUID, session: AsyncSession):
-        loan = await LoanService.get_loan(id=id, session=session)
-        if not loan:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
-            )
-        setattr(loan, "exclude", True)
-        session.add(loan)
-        await session.commit()
+        try:
+            loan = await LoanService.get_loan(id=id, session=session)
+            if not loan:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                )
+            setattr(loan, "exclude", True)
+            session.add(loan)
+            await session.commit()
 
-        return {}
+            return {}
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)[:100]
+            )
 
     @staticmethod
     async def update_loan(
         id: UUID, data: LoanUpdate, session: AsyncSession, current_user: User
     ):
-        loan = await LoanService.get_loan(id=id, session=session)
-        if not loan:
+        try:
+            loan = await LoanService.get_loan(id=id, session=session)
+            if not loan:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                )
+            for key, value in data.model_dump(exclude_unset=True).items():
+                setattr(loan, key, value)
+
+            loan["modified_by_id"] = current_user.id
+            session.add(loan)
+            await session.commit()
+            await session.refresh(loan)
+
+            return loan
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Loan not found"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}"
             )
-        for key, value in data.model_dump(exclude_unset=True).items():
-            setattr(loan, key, value)
-
-        loan["modified_by_id"] = current_user.id
-        session.add(loan)
-        await session.commit()
-        await session.refresh(loan)
-
-        return loan
 
 
 class LoanEntriesService:
@@ -198,6 +219,7 @@ class LoanEntriesService:
 
             return loan_entry
         except Exception as e:
+            await session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     @staticmethod
@@ -274,43 +296,55 @@ class LoanEntriesService:
 
     @staticmethod
     async def delete_loan_entry(id: UUID, session: AsyncSession):
-        loan_entry = await LoanEntriesService.get_loan_entry(id=id, session=session)
-        if not loan_entry:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
+        try:
+            loan_entry = await LoanEntriesService.get_loan_entry(id=id, session=session)
+            if not loan_entry:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
+                )
+
+            setattr(loan_entry, "is_deleted", True)
+            session.add(loan_entry)
+            await session.flush()
+
+            await delete_payment_by_loan_entry_id(
+                loan_entry_id=loan_entry.id, session=session
+            )
+            await PaymentScheduleService.delete_schedule_based_on_loan_entry_id(
+                loan_entry_id=loan_entry.id, session=session
             )
 
-        setattr(loan_entry, "is_deleted", True)
-        session.add(loan_entry)
-        await session.flush()
+            await session.commit()
 
-        await delete_payment_by_loan_entry_id(
-            loan_entry_id=loan_entry.id, session=session
-        )
-        await PaymentScheduleService.delete_schedule_based_on_loan_entry_id(
-            loan_entry_id=loan_entry.id, session=session
-        )
-
-        await session.commit()
-
-        return {}
+            return {}
+        except Exception as e:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}"
+            )
 
     @staticmethod
     async def update_loan_entry(
         id: UUID, data: LoanEntriesUpdate, session: AsyncSession, current_user: User
     ):
-        loan_entry = await LoanEntriesService.get_loan_entry(id=id, session=session)
-        if not loan_entry:
+        try:
+            loan_entry = await LoanEntriesService.get_loan_entry(id=id, session=session)
+            if not loan_entry:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
+                )
+            for key, value in data.model_dump(exclude_unset=True).items():
+                if value:
+                    setattr(loan_entry, key, value)
+
+            loan_entry["modified_by_id"] = current_user.id
+            session.add(loan_entry)
+            await session.commit()
+            await session.refresh(loan_entry)
+
+            return loan_entry
+        except Exception as e:
+            await session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Loan entry not found"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}"
             )
-        for key, value in data.model_dump(exclude_unset=True).items():
-            if value:
-                setattr(loan_entry, key, value)
-
-        loan_entry["modified_by_id"] = current_user.id
-        session.add(loan_entry)
-        await session.commit()
-        await session.refresh(loan_entry)
-
-        return loan_entry
